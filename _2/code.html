@@ -1,0 +1,342 @@
+<!DOCTYPE html><html lang="ar" dir="rtl"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>بصير - قارئ الرسائل والرد الصوتي</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">/** @type {import('tailwindcss').Config} */
+globalThis.tailwind = globalThis.tailwind || {};
+globalThis.tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'accent': '#FFD026',
+        'success': '#10B981',
+        'error': '#EF4444',
+        'warning': '#F59E0B',
+        'listening': '#38BDF8',
+        'light-primary': '#0F172A',
+        'light-on-primary': '#FFFFFF',
+        'light-surface': '#FFFFFF',
+        'light-on-surface': '#090D16',
+        'dark-primary': '#FFD026',
+        'dark-on-primary': '#0A0A0A',
+        'dark-surface': '#0D1117',
+        'dark-on-surface': '#F3F4F6',
+      },
+      borderRadius: {
+        'sm': '8px',
+        'DEFAULT': '16px',
+        'md': '20px',
+        'lg': '24px',
+        'xl': '32px',
+        'full': '9999px',
+      },
+      spacing: {
+        'gutter-xs': '4px',
+        'gutter-sm': '8px',
+        'gutter-md': '16px',
+        'gutter-lg': '24px',
+        'gutter-xl': '32px',
+        'section': '32px',
+        'page-margin': '20px',
+      },
+      fontFamily: {
+        'display': ['"Cairo"', 'sans-serif'],
+        'headline': ['"Cairo"', 'sans-serif'],
+        'body': ['"Tajawal"', 'sans-serif'],
+        'label': ['"Cairo"', 'sans-serif'],
+      },
+      fontSize: {
+        'display-lg': ['36px', { lineHeight: '46px', letterSpacing: '-0.5px', fontWeight: '800' }],
+        'display-lg-mobile': ['30px', { lineHeight: '40px', letterSpacing: '-0.5px', fontWeight: '800' }],
+        'headline-lg': ['28px', { lineHeight: '38px', letterSpacing: '0px', fontWeight: '700' }],
+        'headline-lg-mobile': ['24px', { lineHeight: '34px', letterSpacing: '0px', fontWeight: '700' }],
+        'headline-md': ['20px', { lineHeight: '30px', letterSpacing: '0px', fontWeight: '700' }],
+        'body-lg': ['18px', { lineHeight: '28px', letterSpacing: '0px', fontWeight: '600' }],
+        'body-md': ['16px', { lineHeight: '26px', letterSpacing: '0px', fontWeight: '500' }],
+        'label-lg': ['18px', { lineHeight: '26px', letterSpacing: '0.2px', fontWeight: '700' }],
+        'label-md': ['14px', { lineHeight: '22px', letterSpacing: '0.2px', fontWeight: '700' }],
+      },
+      transitionDuration: {
+        'state-change': '120ms',
+        'surface-enter': '200ms',
+        'surface-exit': '150ms',
+      },
+      transitionDelay: {
+        'state-change': '0ms',
+        'surface-enter': '0ms',
+        'surface-exit': '0ms',
+      },
+      transitionTimingFunction: {
+        'state-change': 'ease-out',
+        'surface-enter': 'cubic-bezier(0, 0, 0.2, 1)',
+        'surface-exit': 'cubic-bezier(0.4, 0, 1, 1)',
+      },
+    },
+  },
+};
+if (typeof module !== 'undefined') module.exports = globalThis.tailwind.config;
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&amp;family=Tajawal:wght@400;500;700;800&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+  <style>
+    @keyframes voicePulse {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(1.08); opacity: 1; }
+    }
+    .voice-pulse-ring {
+      animation: voicePulse 1.8s ease-in-out infinite;
+    }
+    button:focus-visible, [role="button"]:focus-visible {
+      outline: 3px solid #38BDF8;
+      outline-offset: 3px;
+    }
+  </style>
+</head>
+<body class="bg-dark-surface text-dark-on-surface font-body min-h-[884px] flex flex-col justify-between selection:bg-dark-primary selection:text-dark-on-primary" data-stitch-vh="min-h-[884px]===min-h-screen">
+
+  <!-- Header with Contextual Back Navigation & Voice Reader Indicator -->
+  <header class="sticky top-0 z-30 bg-dark-surface/95 border-b-2 border-dark-primary/20 px-page-margin py-3.5 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <!-- Big Touch Back Button for Screen Readers -->
+      <a href="../voice-assistant-home/VoiceAssistantHome.html" class="w-12 h-12 rounded-xl bg-dark-surface border-2 border-dark-on-surface/40 hover:border-dark-primary text-dark-on-surface flex items-center justify-center active:scale-95 transition-all" aria-label="العودة إلى الشاشة الرئيسية">
+        <span class="material-symbols-outlined text-2xl font-bold">arrow_forward</span>
+      </a>
+      <div>
+        <h1 class="font-headline text-headline-md font-bold text-dark-primary leading-tight">قارئ الرسائل</h1>
+        <p class="text-label-md text-dark-on-surface/70 leading-none">اللغة العربية الفصحى</p>
+      </div>
+    </div>
+
+    <!-- Active Audio Status Badge -->
+    <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-listening/20 border border-listening text-listening font-headline font-bold text-label-md">
+      <span class="material-symbols-outlined text-base" style="font-variation-settings: &#39;FILL&#39; 1;">volume_up</span>
+      <span>يقرأ الآن</span>
+    </div>
+  </header>
+
+  <!-- Main Scrollable Flow -->
+  <main class="flex-1 px-page-margin py-4 flex flex-col gap-5 overflow-y-auto">
+
+    <!-- Active Message Playback Card (Highest Focus) -->
+    <section aria-labelledby="active-message-title" class="rounded-xl border-3 border-dark-primary bg-dark-surface p-5 shadow-xl relative overflow-hidden flex flex-col gap-4">
+      
+      <!-- Sender Meta Info -->
+      <div class="flex items-center justify-between border-b border-dark-on-surface/20 pb-3">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-full bg-dark-primary text-dark-on-primary font-headline font-black text-xl flex items-center justify-center border-2 border-listening shadow-md">
+            أ
+          </div>
+          <div>
+            <h2 id="active-message-title" class="font-headline text-headline-md font-bold text-dark-on-surface">
+              أحمد المنصوري
+            </h2>
+            <div class="flex items-center gap-2 text-label-md text-dark-on-surface/75">
+              <span>تطبيق واتساب</span>
+              <span>•</span>
+              <span class="tabular-nums">منذ 5 دقائق</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Speech Speed / Repeat Button -->
+        <button type="button" onclick="replayMessage()" class="w-11 h-11 rounded-lg bg-dark-surface border-2 border-dark-primary/60 hover:border-dark-primary text-dark-primary flex items-center justify-center active:scale-95 transition-all" aria-label="إعادة قراءة هذه الرسالة بصوت واضح">
+          <span class="material-symbols-outlined text-2xl font-bold">replay</span>
+        </button>
+      </div>
+
+      <!-- Spoken Message Body in High-Contrast Typography -->
+      <div class="bg-dark-primary/10 border-2 border-dark-primary/30 rounded-lg p-4">
+        <div class="flex items-center gap-2 text-listening text-label-md font-bold mb-1.5">
+          <span class="material-symbols-outlined text-lg">record_voice_over</span>
+          <span>نص الرسالة المنطوقة:</span>
+        </div>
+        <p id="message-text" class="font-body text-body-lg text-dark-on-surface font-bold leading-relaxed">
+          &#34;السلام عليكم يا أخي، هل أنت جاهز للخروج؟ سأمر عليك بالسيارة بعد نصف ساعة إن شاء الله، يرجى تأكيد حضورك.&#34;
+        </p>
+      </div>
+
+      <!-- Assistant Voice Question to Blind User -->
+      <div class="p-3.5 rounded-lg border-2 border-listening bg-listening/15 flex items-start gap-3">
+        <span class="material-symbols-outlined text-2xl text-listening shrink-0 mt-0.5" style="font-variation-settings: &#39;FILL&#39; 1;">hearing</span>
+        <div>
+          <p class="font-headline text-label-lg font-bold text-dark-on-surface">
+            يسألك بصير: &#34;هل ترغب في الرد على أحمد الآن؟&#34;
+          </p>
+          <p class="text-body-md text-dark-on-surface/80">
+            قل بصوتك: <span class="text-dark-primary font-bold">&#34;نعم، أرسل له: سأكون جاهزاً&#34;</span> أو اضغط على الزر أدناه.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Specific Dedicated Section: Quick Voice Action Commands for this Message -->
+    <section aria-labelledby="voice-actions-heading" class="rounded-xl border-2 border-dark-on-surface/30 bg-dark-surface p-4 flex flex-col gap-3">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2 text-dark-primary">
+          <span class="material-symbols-outlined text-2xl font-bold">mic</span>
+          <h2 id="voice-actions-heading" class="font-headline text-headline-md font-bold text-dark-primary">
+            أوامر الرد الصوتي السريع
+          </h2>
+        </div>
+        <span class="text-label-md px-2.5 py-0.5 rounded-full bg-dark-primary/15 text-dark-primary font-bold border border-dark-primary/40">
+          بالفصحى
+        </span>
+      </div>
+
+      <div class="grid grid-cols-1 gap-2.5">
+        <!-- Quick Voice Command 1 -->
+        <button type="button" onclick="sendQuickReply(&#39;إن شاء الله، سأكون في انتظارك&#39;)" class="w-full text-right p-3.5 rounded-lg border-2 border-dark-on-surface/30 hover:border-dark-primary bg-dark-surface active:bg-dark-primary/10 flex items-center justify-between gap-3 group transition-all">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-success/20 text-success border border-success flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-xl">send</span>
+            </div>
+            <div>
+              <div class="font-headline text-label-lg font-bold text-dark-on-surface group-hover:text-dark-primary">&#34;نعم، سأكون في انتظارك&#34;</div>
+              <div class="text-body-md text-dark-on-surface/70">إرسال رد فوري بالصوت</div>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-listening text-2xl group-hover:scale-110 transition-transform">play_circle</span>
+        </button>
+
+        <!-- Quick Voice Command 2: Call Sender -->
+        <button type="button" onclick="callSender(&#39;أحمد المنصوري&#39;)" class="w-full text-right p-3.5 rounded-lg border-2 border-dark-on-surface/30 hover:border-dark-primary bg-dark-surface active:bg-dark-primary/10 flex items-center justify-between gap-3 group transition-all">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-listening/20 text-listening border border-listening flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-xl">call</span>
+            </div>
+            <div>
+              <div class="font-headline text-label-lg font-bold text-dark-on-surface group-hover:text-dark-primary">&#34;اتصل بأحمد هاتفياً&#34;</div>
+              <div class="text-body-md text-dark-on-surface/70">بدء مكالمة صوتية مباشرة مع المرسل</div>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-listening text-2xl group-hover:scale-110 transition-transform">phone_forwarded</span>
+        </button>
+
+        <!-- Quick Voice Command 3: Next Message -->
+        <button type="button" onclick="nextMessage()" class="w-full text-right p-3.5 rounded-lg border-2 border-dark-on-surface/30 hover:border-dark-primary bg-dark-surface active:bg-dark-primary/10 flex items-center justify-between gap-3 group transition-all">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-dark-primary/20 text-dark-primary border border-dark-primary flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-xl">skip_next</span>
+            </div>
+            <div>
+              <div class="font-headline text-label-lg font-bold text-dark-on-surface group-hover:text-dark-primary">&#34;اقرأ الرسالة التالية&#34;</div>
+              <div class="text-body-md text-dark-on-surface/70">الانتقال للرسالة غير المقروءة الثانية (متبقي 2)</div>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-listening text-2xl group-hover:scale-110 transition-transform">arrow_back</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Visual Confirmation Box for Dictated Reply -->
+    <div id="reply-confirmation-box" class="rounded-xl border-2 border-success bg-success/10 p-4 hidden">
+      <div class="flex items-center gap-2.5 text-success font-headline font-bold text-label-lg mb-1">
+        <span class="material-symbols-outlined text-2xl">check_circle</span>
+        <span>تم إرسال الرد الصوتي بنجاح!</span>
+      </div>
+      <p id="sent-reply-text" class="text-body-md text-dark-on-surface font-semibold">
+        &#34;إن شاء الله، سأكون في انتظارك&#34;
+      </p>
+    </div>
+
+  </main>
+
+  <!-- Large Tactile Voice Microphone Dock (Speak to Reply) -->
+  <footer class="sticky bottom-0 z-40 bg-dark-surface/98 border-t-2 border-dark-primary/30 px-page-margin py-4 flex flex-col items-center gap-2 shadow-2xl">
+    <div class="w-full flex items-center justify-between text-label-md font-bold text-dark-on-surface/75 px-2">
+      <span class="flex items-center gap-1.5 text-success">
+        <span class="w-2.5 h-2.5 rounded-full bg-success"></span>
+        <span>الرد الصوتي جاهز للاستماع</span>
+      </span>
+      <span class="text-listening">قل ما تريد إرساله</span>
+    </div>
+
+    <!-- Huge Central Accessible Microphone Button (>= 80px) -->
+    <div class="relative flex items-center justify-center my-1">
+      <div class="absolute w-24 h-24 rounded-full bg-dark-primary/20 voice-pulse-ring pointer-events-none"></div>
+
+      <button id="dictate-voice-button" type="button" onclick="startDictation()" class="relative w-20 h-20 rounded-full bg-dark-primary text-dark-on-primary border-4 border-listening shadow-2xl flex items-center justify-center active:scale-90 transition-all duration-state-change focus:ring-4 focus:ring-listening" aria-label="انقر وأملِ ردك الصوتي الآن">
+        <span class="material-symbols-outlined text-4xl" style="font-variation-settings: &#39;FILL&#39; 1;">mic</span>
+      </button>
+    </div>
+
+    <p id="dictation-status-text" class="text-label-md text-dark-primary font-bold text-center tracking-wide">
+      انقر هنا وتكلّم بالرد باللغة العربية الفصحى
+    </p>
+  </footer>
+
+  <script>
+    function replayMessage() {
+      const text = document.getElementById('message-text').innerText;
+      speakText("رسالة من أحمد المنصوري: " + text);
+    }
+
+    function sendQuickReply(reply) {
+      const confirmBox = document.getElementById('reply-confirmation-box');
+      const sentText = document.getElementById('sent-reply-text');
+      confirmBox.classList.remove('hidden');
+      sentText.innerText = `"${reply}"`;
+      speakText(`تم إرسال ردك: ${reply}`);
+    }
+
+    function callSender(name) {
+      speakText(`جاري الاتصال بـ ${name}...`);
+    }
+
+    function nextMessage() {
+      speakText("جاري تحميل الرسالة التالية من مريم...");
+      setTimeout(() => {
+        document.getElementById('active-message-title').innerText = "مريم العلمي";
+        document.getElementById('message-text').innerText = "مرحباً، هل يمكنك مشاركة المستند الصوتي الذي تحدثنا عنه بالأمس؟ شكراً جزيلاً.";
+        speakText("رسالة جديدة من مريم العلمي: مرحباً، هل يمكنك مشاركة المستند الصوتي الذي تحدثنا عنه بالأمس؟");
+      }, 1000);
+    }
+
+    function startDictation() {
+      const statusText = document.getElementById('dictation-status-text');
+      statusText.innerText = "أستمع إليك الآن... تكلّم بالرد";
+      playBeep();
+      setTimeout(() => {
+        sendQuickReply("حسناً، أنا قادم الآن.");
+        statusText.innerText = "تم تسجيل الرد وإرساله بنجاح!";
+      }, 2500);
+    }
+
+    function speakText(text) {
+      playBeep();
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'ar-SA';
+        utterance.rate = 0.95;
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    function playBeep() {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.frequency.setValueAtTime(659.25, audioCtx.currentTime); // E5
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.15);
+      } catch (e) {}
+    }
+
+    // Auto-read on load for blind user simulation
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        replayMessage();
+      }, 500);
+    });
+  </script>
+
+
+</body></html>

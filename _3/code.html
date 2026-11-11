@@ -1,0 +1,384 @@
+<!DOCTYPE html><html lang="ar" dir="rtl"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>بصير - إعدادات وتجربة زر خفض الصوت الفيزيائي</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">/** @type {import('tailwindcss').Config} */
+globalThis.tailwind = globalThis.tailwind || {};
+globalThis.tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'accent': '#FFD026',
+        'success': '#10B981',
+        'error': '#EF4444',
+        'warning': '#F59E0B',
+        'listening': '#38BDF8',
+        'light-primary': '#0F172A',
+        'light-on-primary': '#FFFFFF',
+        'light-surface': '#FFFFFF',
+        'light-on-surface': '#090D16',
+        'dark-primary': '#FFD026',
+        'dark-on-primary': '#0A0A0A',
+        'dark-surface': '#0D1117',
+        'dark-on-surface': '#F3F4F6',
+      },
+      borderRadius: {
+        'sm': '8px',
+        'DEFAULT': '16px',
+        'md': '20px',
+        'lg': '24px',
+        'xl': '32px',
+        'full': '9999px',
+      },
+      spacing: {
+        'gutter-xs': '4px',
+        'gutter-sm': '8px',
+        'gutter-md': '16px',
+        'gutter-lg': '24px',
+        'gutter-xl': '32px',
+        'section': '32px',
+        'page-margin': '20px',
+      },
+      fontFamily: {
+        'display': ['"Cairo"', 'sans-serif'],
+        'headline': ['"Cairo"', 'sans-serif'],
+        'body': ['"Tajawal"', 'sans-serif'],
+        'label': ['"Cairo"', 'sans-serif'],
+      },
+      fontSize: {
+        'display-lg': ['36px', { lineHeight: '46px', letterSpacing: '-0.5px', fontWeight: '800' }],
+        'display-lg-mobile': ['30px', { lineHeight: '40px', letterSpacing: '-0.5px', fontWeight: '800' }],
+        'headline-lg': ['28px', { lineHeight: '38px', letterSpacing: '0px', fontWeight: '700' }],
+        'headline-lg-mobile': ['24px', { lineHeight: '34px', letterSpacing: '0px', fontWeight: '700' }],
+        'headline-md': ['20px', { lineHeight: '30px', letterSpacing: '0px', fontWeight: '700' }],
+        'body-lg': ['18px', { lineHeight: '28px', letterSpacing: '0px', fontWeight: '600' }],
+        'body-md': ['16px', { lineHeight: '26px', letterSpacing: '0px', fontWeight: '500' }],
+        'label-lg': ['18px', { lineHeight: '26px', letterSpacing: '0.2px', fontWeight: '700' }],
+        'label-md': ['14px', { lineHeight: '22px', letterSpacing: '0.2px', fontWeight: '700' }],
+      },
+      transitionDuration: {
+        'state-change': '120ms',
+        'surface-enter': '200ms',
+        'surface-exit': '150ms',
+      },
+      transitionDelay: {
+        'state-change': '0ms',
+        'surface-enter': '0ms',
+        'surface-exit': '0ms',
+      },
+      transitionTimingFunction: {
+        'state-change': 'ease-out',
+        'surface-enter': 'cubic-bezier(0, 0, 0.2, 1)',
+        'surface-exit': 'cubic-bezier(0.4, 0, 1, 1)',
+      },
+    },
+  },
+};
+if (typeof module !== 'undefined') module.exports = globalThis.tailwind.config;
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&amp;family=Tajawal:wght@400;500;700;800&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+  <style>
+    @keyframes holdPulse {
+      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7); }
+      70% { transform: scale(1.04); box-shadow: 0 0 0 20px rgba(56, 189, 248, 0); }
+      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
+    }
+    .holding-active {
+      animation: holdPulse 1.2s infinite;
+      border-color: #38BDF8 !important;
+      background-color: #0F172A !important;
+    }
+    button:focus-visible, [role="button"]:focus-visible {
+      outline: 3px solid #38BDF8;
+      outline-offset: 3px;
+    }
+  </style>
+</head>
+<body class="bg-dark-surface text-dark-on-surface font-body min-h-[884px] flex flex-col justify-between selection:bg-dark-primary selection:text-dark-on-primary" data-stitch-vh="min-h-[884px]===min-h-screen">
+
+  <!-- Header -->
+  <header class="sticky top-0 z-30 bg-dark-surface/95 border-b-2 border-dark-primary/20 px-page-margin py-3.5 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <a href="../voice-assistant-home/VoiceAssistantHome.html" class="w-12 h-12 rounded-xl bg-dark-surface border-2 border-dark-on-surface/40 hover:border-dark-primary text-dark-on-surface flex items-center justify-center active:scale-95 transition-all" aria-label="العودة للرئيسية">
+        <span class="material-symbols-outlined text-2xl font-bold">arrow_forward</span>
+      </a>
+      <div>
+        <h1 class="font-headline text-headline-md font-bold text-dark-primary leading-tight">زر خفض الصوت (PTT)</h1>
+        <p class="text-label-md text-dark-on-surface/70 leading-none">تحكم فيزيائي حتى والشاشة مقفلة</p>
+      </div>
+    </div>
+
+    <!-- Active Hardware Service Indicator -->
+    <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-success/20 border border-success text-success font-headline font-bold text-label-md">
+      <span class="w-2.5 h-2.5 rounded-full bg-success animate-pulse"></span>
+      <span>مفعّل بالخلفية</span>
+    </div>
+  </header>
+
+  <!-- Main Content & Interactive Simulator -->
+  <main class="flex-1 px-page-margin py-4 flex flex-col gap-5 overflow-y-auto">
+
+    <!-- Behavior Feature Summary Card (The Exact User Rule) -->
+    <section aria-labelledby="rule-summary-heading" class="rounded-xl border-3 border-dark-primary bg-dark-surface p-5 shadow-lg flex flex-col gap-3">
+      <div class="flex items-center gap-2.5 text-dark-primary">
+        <span class="material-symbols-outlined text-2xl font-bold">volume_down</span>
+        <h2 id="rule-summary-heading" class="font-headline text-headline-md font-bold text-dark-primary">
+          قاعدة عمل الزر الفيزيائي للمكفوفين
+        </h2>
+      </div>
+
+      <div class="space-y-3 text-body-md text-dark-on-surface">
+        <div class="flex items-start gap-3 bg-dark-primary/10 border-2 border-dark-primary/30 p-3.5 rounded-lg">
+          <span class="material-symbols-outlined text-2xl text-dark-primary shrink-0">touch_app</span>
+          <div>
+            <strong class="font-headline text-label-lg text-dark-primary block">1. الضغط المستمر (Hold):</strong>
+            <span>يبدأ المساعد &#34;بصير&#34; في الاستماع فوراً مع اهتزاز ملموس (Haptic buzz) وصوت نغمة بدء.</span>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-3 bg-listening/10 border-2 border-listening/40 p-3.5 rounded-lg">
+          <span class="material-symbols-outlined text-2xl text-listening shrink-0">front_hand</span>
+          <div>
+            <strong class="font-headline text-label-lg text-listening block">2. رفع اليد (Release):</strong>
+            <span>يتوقف الاستماع فوراً ويتم تنفيذ الأمر الصوتي مباشرة وإعلان النتيجة بصوت واضح.</span>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-3 bg-dark-surface border-2 border-dark-on-surface/30 p-3.5 rounded-lg">
+          <span class="material-symbols-outlined text-2xl text-success shrink-0">screen_lock_portrait</span>
+          <div>
+            <strong class="font-headline text-label-lg text-success block">3. أثناء قفل الشاشة (Screen Off):</strong>
+            <span>يعمل الزر عبر خدمة إمكانية الوصول في أندرويد دون الحاجة لفتح قفل الشاشة.</span>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-3 bg-dark-surface border-2 border-dark-on-surface/30 p-3.5 rounded-lg">
+          <span class="material-symbols-outlined text-2xl text-warning shrink-0">volume_down</span>
+          <div>
+            <strong class="font-headline text-label-lg text-warning block">4. خفض مستوى الصوت العادي:</strong>
+            <span>إذا لم يتم نطق أمر صوتي، أو عند استمرار الضغط في وضع الوسائط، يتم خفض درجة الصوت تدريجياً.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Interactive Button Simulator for Testing the Behavior -->
+    <section aria-labelledby="simulator-heading" class="rounded-xl border-2 border-listening/40 bg-dark-surface p-5 flex flex-col items-center gap-4 text-center">
+      <div class="flex items-center gap-2 text-listening">
+        <span class="material-symbols-outlined text-2xl">sensors</span>
+        <h2 id="simulator-heading" class="font-headline text-headline-md font-bold text-listening">
+          محاكي تجربة زر خفض الصوت الفيزيائي
+        </h2>
+      </div>
+
+      <p class="text-body-md text-dark-on-surface/80">
+        جرب الآن: اضغط باستمرار بإصبعك على الزر أدناه لبدء الأمر الصوتي، ثم ارفع يدك لتنفيذه فوراً:
+      </p>
+
+      <!-- Simulated Physical Hardware Volume Down Rocker -->
+      <div class="w-full max-w-xs flex flex-col items-center my-2">
+        <button id="sim-vol-down-btn" type="button" onmousedown="startPhysicalHold(event)" onmouseup="endPhysicalHold(event)" ontouchstart="startPhysicalHold(event)" ontouchend="endPhysicalHold(event)" class="w-full min-h-[96px] rounded-2xl bg-dark-surface border-4 border-dark-primary text-dark-on-surface p-4 flex flex-col items-center justify-center gap-2 select-none active:bg-dark-primary/20 transition-all cursor-pointer shadow-xl focus:ring-4 focus:ring-listening" aria-label="محاكي زر خفض الصوت: اضغط مطولاً لبدء الأمر الصوتي وارفع يدك للتنفيذ">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-4xl text-dark-primary">volume_down</span>
+            <span class="font-headline text-headline-md font-black text-dark-primary">زر خفض الصوت [-]</span>
+          </div>
+          <span id="btn-instruction" class="text-label-md font-bold text-listening">
+            اضغط باستمرار للتحدث • ارفع يدك للتنفيذ
+          </span>
+        </button>
+      </div>
+
+      <!-- Real-time Status Screen Simulation -->
+      <div id="sim-status-box" class="w-full p-4 rounded-xl border-2 border-dark-on-surface/30 bg-dark-surface text-right space-y-2">
+        <div class="flex items-center justify-between text-label-md font-bold">
+          <span class="text-dark-on-surface/70">حالة المستشعر:</span>
+          <span id="sim-sensor-state" class="text-dark-primary">في وضع الاستعداد</span>
+        </div>
+        
+        <div class="border-t border-dark-on-surface/20 pt-2">
+          <div class="text-label-md text-dark-on-surface/70">ما تم التقاطه:</div>
+          <p id="sim-transcript" class="font-body text-body-lg text-dark-on-surface font-bold mt-1">
+            &#34;في انتظار ضغط زر خفض الصوت...&#34;
+          </p>
+        </div>
+
+        <div id="sim-result-row" class="border-t border-dark-on-surface/20 pt-2 hidden">
+          <div class="text-label-md text-success font-bold">نتيجة التنفيذ الصوتي:</div>
+          <p id="sim-result-text" class="text-body-md text-success font-semibold mt-0.5">
+            -
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Lockscreen Toggles for Accessibility Service -->
+    <section aria-labelledby="settings-heading" class="rounded-xl border-2 border-dark-on-surface/30 bg-dark-surface p-4 flex flex-col gap-3">
+      <h2 id="settings-heading" class="font-headline text-headline-md font-bold text-dark-primary">
+        خيارات أندرويد للمكفوفين (Accessibility)
+      </h2>
+
+      <!-- Toggle 1: Screen Off Execution -->
+      <div class="flex items-center justify-between p-3 rounded-lg border-2 border-dark-on-surface/20 bg-dark-surface">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-2xl text-dark-primary">screen_lock_portrait</span>
+          <div>
+            <div class="font-headline text-label-lg font-bold text-dark-on-surface">التشغيل أثناء قفل الشاشة</div>
+            <div class="text-body-md text-dark-on-surface/70">تفعيل الاستماع دون إيقاظ الشاشة لتوفير البطارية</div>
+          </div>
+        </div>
+        <span class="text-success font-headline font-bold text-label-lg">مفعّل دائماً</span>
+      </div>
+
+      <!-- Toggle 2: Haptic Vibration Feedback -->
+      <div class="flex items-center justify-between p-3 rounded-lg border-2 border-dark-on-surface/20 bg-dark-surface">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-2xl text-listening">vibration</span>
+          <div>
+            <div class="font-headline text-label-lg font-bold text-dark-on-surface">الاهتزاز اللمسي (Haptic)</div>
+            <div class="text-body-md text-dark-on-surface/70">اهتزاز قوي عند الضغط واهتزازان عند التنفيذ</div>
+          </div>
+        </div>
+        <span class="text-success font-headline font-bold text-label-lg">مفعّل</span>
+      </div>
+
+      <!-- Toggle 3: Fallback volume down -->
+      <div class="flex items-center justify-between p-3 rounded-lg border-2 border-dark-on-surface/20 bg-dark-surface">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-2xl text-warning">volume_down</span>
+          <div>
+            <div class="font-headline text-label-lg font-bold text-dark-on-surface">خفض الصوت بالضغط المستمر</div>
+            <div class="text-body-md text-dark-on-surface/70">ينخفض الصوت تدريجياً إن لم يُنطق أمر</div>
+          </div>
+        </div>
+        <span class="text-success font-headline font-bold text-label-lg">مفعّل</span>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Bottom Bar Navigation to Home -->
+  <footer class="sticky bottom-0 z-40 bg-dark-surface/98 border-t-2 border-dark-primary/30 px-page-margin py-3 flex items-center justify-between shadow-2xl">
+    <a href="../voice-assistant-home/VoiceAssistantHome.html" class="w-full min-h-[56px] rounded-xl bg-dark-primary text-dark-on-primary font-headline font-black text-headline-md flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all">
+      <span class="material-symbols-outlined text-2xl">home</span>
+      <span>الرجوع للشاشة الرئيسية للمساعد</span>
+    </a>
+  </footer>
+
+  <script>
+    let isHolding = false;
+    let holdStartTime = 0;
+    let holdTimer = null;
+    let volumeLevel = 70;
+
+    const sampleCommands = [
+      { speech: "شحال في الساعة دابا؟", response: "الساعة الآن العاشرة والربع صباحاً." },
+      { speech: "عيط لـ أمي", response: "جاري الاتصال بـ أمي عبر الهاتف..." },
+      { speech: "قرا ليا آخر ميساج", response: "رسالة جديدة من أحمد المنصوري: سأمر عليك بعد نصف ساعة." },
+      { speech: "شنو كاين قدامي؟", response: "الكاميرا الذكية: باب الغرفة مفتوح على بُعد مترين." }
+    ];
+
+    let currentSampleIndex = 0;
+
+    function startPhysicalHold(e) {
+      if (e) e.preventDefault();
+      if (isHolding) return;
+      isHolding = true;
+      holdStartTime = Date.now();
+
+      const btn = document.getElementById('sim-vol-down-btn');
+      const instruction = document.getElementById('btn-instruction');
+      const sensorState = document.getElementById('sim-sensor-state');
+      const transcript = document.getElementById('sim-transcript');
+      const resultRow = document.getElementById('sim-result-row');
+
+      btn.classList.add('holding-active');
+      instruction.textContent = "جاري الاستماع الآن... (ارفع يدك لإنهاء ونطق الأمر)";
+      sensorState.textContent = "زر خفض الصوت مضغوط • الميكروفون نشط";
+      sensorState.className = "text-listening font-bold animate-pulse";
+      resultRow.classList.add('hidden');
+
+      const cmd = sampleCommands[currentSampleIndex % sampleCommands.length];
+      transcript.innerHTML = `<span class="text-listening font-bold">يستمع:</span> "${cmd.speech}"`;
+
+      // Haptic buzz tone
+      playAudioCue(600, 0.1);
+
+      // Accessibility vibration API
+      if (navigator.vibrate) {
+        navigator.vibrate(80);
+      }
+    }
+
+    function endPhysicalHold(e) {
+      if (e) e.preventDefault();
+      if (!isHolding) return;
+      isHolding = false;
+      const holdDuration = Date.now() - holdStartTime;
+
+      const btn = document.getElementById('sim-vol-down-btn');
+      const instruction = document.getElementById('btn-instruction');
+      const sensorState = document.getElementById('sim-sensor-state');
+      const transcript = document.getElementById('sim-transcript');
+      const resultRow = document.getElementById('sim-result-row');
+      const resultText = document.getElementById('sim-result-text');
+
+      btn.classList.remove('holding-active');
+      instruction.textContent = "اضغط باستمرار للتحدث • ارفع يدك للتنفيذ";
+
+      // If hold was extremely short (< 400ms), treat as normal volume step down
+      if (holdDuration < 400) {
+        volumeLevel = Math.max(0, volumeLevel - 10);
+        sensorState.textContent = `تم خفض مستوى الصوت إلى ${volumeLevel}%`;
+        sensorState.className = "text-warning font-bold";
+        transcript.innerHTML = `تم خفض الصوت بنقرة سريعة (${volumeLevel}%).`;
+        playAudioCue(400, 0.08);
+        return;
+      }
+
+      // Voice Command Trigger on Release
+      sensorState.textContent = "تم رفع اليد • جاري التنفيذ الفوري للأمر";
+      sensorState.className = "text-success font-bold";
+
+      const executedCmd = sampleCommands[currentSampleIndex % sampleCommands.length];
+      currentSampleIndex++;
+
+      resultRow.classList.remove('hidden');
+      resultText.textContent = `تم التنفيذ: ${executedCmd.response}`;
+
+      // Double confirmation tone + vibration
+      playAudioCue(880, 0.15);
+      if (navigator.vibrate) {
+        navigator.vibrate([60, 40, 60]);
+      }
+
+      // Voice readout to blind user
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(executedCmd.response);
+        utterance.lang = 'ar-SA';
+        utterance.rate = 0.95;
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    function playAudioCue(freq, duration) {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (err) {}
+    }
+  </script>
+
+
+</body></html>

@@ -1,0 +1,319 @@
+<!DOCTYPE html><html lang="ar" dir="rtl"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>بصير - إعدادات الصوت والنطق والزر الفيزيائي</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">/** @type {import('tailwindcss').Config} */
+globalThis.tailwind = globalThis.tailwind || {};
+globalThis.tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'accent': '#FFD026',
+        'success': '#10B981',
+        'error': '#EF4444',
+        'warning': '#F59E0B',
+        'listening': '#38BDF8',
+        'light-primary': '#0F172A',
+        'light-on-primary': '#FFFFFF',
+        'light-surface': '#FFFFFF',
+        'light-on-surface': '#090D16',
+        'dark-primary': '#FFD026',
+        'dark-on-primary': '#0A0A0A',
+        'dark-surface': '#0D1117',
+        'dark-on-surface': '#F3F4F6',
+      },
+      borderRadius: {
+        'sm': '8px',
+        'DEFAULT': '16px',
+        'md': '20px',
+        'lg': '24px',
+        'xl': '32px',
+        'full': '9999px',
+      },
+      spacing: {
+        'gutter-xs': '4px',
+        'gutter-sm': '8px',
+        'gutter-md': '16px',
+        'gutter-lg': '24px',
+        'gutter-xl': '32px',
+        'section': '32px',
+        'page-margin': '20px',
+      },
+      fontFamily: {
+        'display': ['"Cairo"', 'sans-serif'],
+        'headline': ['"Cairo"', 'sans-serif'],
+        'body': ['"Tajawal"', 'sans-serif'],
+        'label': ['"Cairo"', 'sans-serif'],
+      },
+      fontSize: {
+        'display-lg': ['36px', { lineHeight: '46px', letterSpacing: '-0.5px', fontWeight: '800' }],
+        'display-lg-mobile': ['30px', { lineHeight: '40px', letterSpacing: '-0.5px', fontWeight: '800' }],
+        'headline-lg': ['28px', { lineHeight: '38px', letterSpacing: '0px', fontWeight: '700' }],
+        'headline-lg-mobile': ['24px', { lineHeight: '34px', letterSpacing: '0px', fontWeight: '700' }],
+        'headline-md': ['20px', { lineHeight: '30px', letterSpacing: '0px', fontWeight: '700' }],
+        'body-lg': ['18px', { lineHeight: '28px', letterSpacing: '0px', fontWeight: '600' }],
+        'body-md': ['16px', { lineHeight: '26px', letterSpacing: '0px', fontWeight: '500' }],
+        'label-lg': ['18px', { lineHeight: '26px', letterSpacing: '0.2px', fontWeight: '700' }],
+        'label-md': ['14px', { lineHeight: '22px', letterSpacing: '0.2px', fontWeight: '700' }],
+      },
+      transitionDuration: {
+        'state-change': '120ms',
+        'surface-enter': '200ms',
+        'surface-exit': '150ms',
+      },
+      transitionDelay: {
+        'state-change': '0ms',
+        'surface-enter': '0ms',
+        'surface-exit': '0ms',
+      },
+      transitionTimingFunction: {
+        'state-change': 'ease-out',
+        'surface-enter': 'cubic-bezier(0, 0, 0.2, 1)',
+        'surface-exit': 'cubic-bezier(0.4, 0, 1, 1)',
+      },
+    },
+  },
+};
+if (typeof module !== 'undefined') module.exports = globalThis.tailwind.config;
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&amp;family=Tajawal:wght@400;500;700;800&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+  <style>
+    button:focus-visible, [role="button"]:focus-visible, input:focus-visible {
+      outline: 3px solid #38BDF8;
+      outline-offset: 3px;
+    }
+  </style>
+</head>
+<body class="bg-dark-surface text-dark-on-surface font-body min-h-[884px] flex flex-col justify-between selection:bg-dark-primary selection:text-dark-on-primary" data-stitch-vh="min-h-[884px]===min-h-screen">
+
+  <!-- Header with Back Link -->
+  <header class="sticky top-0 z-30 bg-dark-surface/95 border-b-2 border-dark-primary/20 px-page-margin py-3.5 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <a href="../voice-assistant-home/VoiceAssistantHome.html" class="w-12 h-12 rounded-xl bg-dark-surface border-2 border-dark-on-surface/40 hover:border-dark-primary text-dark-on-surface flex items-center justify-center active:scale-95 transition-all" aria-label="العودة للشاشة الرئيسية">
+        <span class="material-symbols-outlined text-2xl font-bold">arrow_forward</span>
+      </a>
+      <div>
+        <h1 class="font-headline text-headline-md font-bold text-dark-primary leading-tight">إعدادات الصوت والنطق</h1>
+        <p class="text-label-md text-dark-on-surface/70 leading-none">تخصيص تجربة المكفوفين</p>
+      </div>
+    </div>
+
+    <!-- Quick Spoken Help Button -->
+    <button type="button" onclick="speakSettingsHelp()" class="flex items-center gap-1.5 bg-dark-primary/20 text-dark-primary hover:bg-dark-primary hover:text-dark-on-primary border border-dark-primary/60 px-3 py-1.5 rounded-lg text-label-md font-bold transition-all" aria-label="قراءة الإعدادات الحالية بصوت بصير">
+      <span class="material-symbols-outlined text-lg">volume_up</span>
+      <span>اقرأ الإعدادات</span>
+    </button>
+  </header>
+
+  <!-- Settings Sections List -->
+  <main class="flex-1 px-page-margin py-4 flex flex-col gap-5 overflow-y-auto">
+
+    <!-- 1. Voice Persona & Dialect -->
+    <section aria-labelledby="voice-persona-heading" class="rounded-xl border-3 border-dark-primary bg-dark-surface p-4 flex flex-col gap-3 shadow-lg">
+      <div class="flex items-center gap-2 text-dark-primary border-b border-dark-on-surface/20 pb-2.5">
+        <span class="material-symbols-outlined text-2xl font-bold">record_voice_over</span>
+        <h2 id="voice-persona-heading" class="font-headline text-headline-md font-bold text-dark-primary">
+          نبرة وصوت المساعد
+        </h2>
+      </div>
+
+      <!-- Dialect Selector (Large Tactile Radio Cards) -->
+      <div class="grid grid-cols-2 gap-3">
+        <button type="button" id="persona-fusha" onclick="selectPersona(&#39;fusha&#39;)" class="p-4 rounded-xl border-3 border-dark-primary bg-dark-primary/10 text-right flex flex-col gap-1.5 transition-all" aria-pressed="true">
+          <div class="flex items-center justify-between">
+            <span class="font-headline text-label-lg font-bold text-dark-primary">الفصحى</span>
+            <span class="material-symbols-outlined text-dark-primary text-xl" style="font-variation-settings: &#39;FILL&#39; 1;">check_circle</span>
+          </div>
+          <span class="text-body-md text-dark-on-surface/80">نطق دقيق ومفصل لكافة الأوامر</span>
+        </button>
+
+        <button type="button" id="persona-darija" onclick="selectPersona(&#39;darija&#39;)" class="p-4 rounded-xl border-2 border-dark-on-surface/30 bg-dark-surface text-right flex flex-col gap-1.5 transition-all hover:border-dark-primary" aria-pressed="false">
+          <div class="flex items-center justify-between">
+            <span class="font-headline text-label-lg font-bold text-dark-on-surface">الدارجة المغربية</span>
+            <span class="material-symbols-outlined text-dark-on-surface/40 text-xl">radio_button_unchecked</span>
+          </div>
+          <span class="text-body-md text-dark-on-surface/80">لهجة يومية مغربية طبيعية</span>
+        </button>
+      </div>
+
+      <!-- Voice Gender Pick -->
+      <div class="flex items-center justify-between p-3 rounded-lg border border-dark-on-surface/30 bg-dark-surface">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-2xl text-listening">spatial_audio_off</span>
+          <div>
+            <div class="font-headline text-label-lg font-bold text-dark-on-surface">نوع الصوت (القارئ الآلي)</div>
+            <div class="text-body-md text-dark-on-surface/70">صوت طبيعي فائق الوضوح (ذكر / أنثى)</div>
+          </div>
+        </div>
+
+        <button type="button" onclick="toggleVoiceGender()" id="voice-gender-btn" class="px-4 py-2 rounded-lg bg-dark-surface border-2 border-dark-primary text-dark-primary font-headline font-bold text-label-md">
+          صوت ذكر (بصير)
+        </button>
+      </div>
+    </section>
+
+    <!-- 2. Speech Rate & Pitch Controls (Accessible Big Sliders / Steppers) -->
+    <section aria-labelledby="speed-pitch-heading" class="rounded-xl border-2 border-listening/40 bg-dark-surface p-4 flex flex-col gap-4">
+      <div class="flex items-center justify-between border-b border-dark-on-surface/20 pb-2.5">
+        <div class="flex items-center gap-2 text-dark-primary">
+          <span class="material-symbols-outlined text-2xl font-bold">speed</span>
+          <h2 id="speed-pitch-heading" class="font-headline text-headline-md font-bold text-dark-primary">
+            سرعة النطق وقوة الصوت
+          </h2>
+        </div>
+        <button type="button" onclick="testCurrentSpeed()" class="text-listening font-headline font-bold text-label-md hover:underline flex items-center gap-1">
+          <span class="material-symbols-outlined text-base">play_arrow</span>
+          <span>تجربة الصوت</span>
+        </button>
+      </div>
+
+      <!-- Speech Speed Stepper (Very important for blind users who listen at high speeds) -->
+      <div class="flex flex-col gap-2">
+        <div class="flex items-center justify-between">
+          <span class="font-headline text-label-lg font-bold text-dark-on-surface">سرعة نطق القارئ:</span>
+          <span id="speed-label" class="text-dark-primary font-bold text-headline-md tabular-nums">1.0x (طبيعي)</span>
+        </div>
+        <div class="grid grid-cols-4 gap-2">
+          <button type="button" onclick="setSpeed(0.8, &#39;0.8x (هادئ)&#39;)" class="speed-btn p-3 rounded-lg border-2 border-dark-on-surface/30 font-bold text-label-md hover:border-dark-primary">0.8x</button>
+          <button type="button" onclick="setSpeed(1.0, &#39;1.0x (طبيعي)&#39;)" class="speed-btn p-3 rounded-lg border-2 border-dark-primary bg-dark-primary text-dark-on-primary font-bold text-label-md">1.0x</button>
+          <button type="button" onclick="setSpeed(1.3, &#39;1.3x (سريع)&#39;)" class="speed-btn p-3 rounded-lg border-2 border-dark-on-surface/30 font-bold text-label-md hover:border-dark-primary">1.3x</button>
+          <button type="button" onclick="setSpeed(1.6, &#39;1.6x (فائق)&#39;)" class="speed-btn p-3 rounded-lg border-2 border-dark-on-surface/30 font-bold text-label-md hover:border-dark-primary">1.6x</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Hardware Key Sensitivity (Push-To-Talk Setup) -->
+    <section aria-labelledby="hardware-custom-heading" class="rounded-xl border-2 border-dark-on-surface/30 bg-dark-surface p-4 flex flex-col gap-3">
+      <div class="flex items-center justify-between border-b border-dark-on-surface/20 pb-2.5">
+        <div class="flex items-center gap-2 text-dark-primary">
+          <span class="material-symbols-outlined text-2xl font-bold">tune</span>
+          <h2 id="hardware-custom-heading" class="font-headline text-headline-md font-bold text-dark-primary">
+            حساسية زر خفض الصوت الفيزيائي
+          </h2>
+        </div>
+        <span class="text-label-md text-success font-bold">مفعّل</span>
+      </div>
+
+      <!-- Sensitivity level -->
+      <div class="p-3 rounded-lg border border-dark-on-surface/30 flex items-center justify-between">
+        <div>
+          <div class="font-headline text-label-lg font-bold text-dark-on-surface">مدة الضغط لبدء الاستماع</div>
+          <div class="text-body-md text-dark-on-surface/70">زمن التمييز بين نقرة خفض الصوت والضغط للتحدث</div>
+        </div>
+        <span class="text-dark-primary font-bold tabular-nums">400 ميلي ثانية</span>
+      </div>
+
+      <!-- Screen-off toggle reminder -->
+      <div class="p-3 rounded-lg border border-dark-on-surface/30 flex items-center justify-between">
+        <div>
+          <div class="font-headline text-label-lg font-bold text-dark-on-surface">الاستجابة الفورية والشاشة مقفلة</div>
+          <div class="text-body-md text-dark-on-surface/70">توفير البطارية عبر الاستماع دون إضاءة الشاشة</div>
+        </div>
+        <span class="text-success font-bold text-label-md flex items-center gap-1">
+          <span class="material-symbols-outlined text-base">check_circle</span>
+          <span>شغال</span>
+        </span>
+      </div>
+    </section>
+
+    <!-- 4. Tactile Sound & Haptics -->
+    <section aria-labelledby="haptics-heading" class="rounded-xl border-2 border-dark-on-surface/30 bg-dark-surface p-4 flex flex-col gap-3">
+      <div class="flex items-center gap-2 text-dark-primary border-b border-dark-on-surface/20 pb-2.5">
+        <span class="material-symbols-outlined text-2xl font-bold">vibration</span>
+        <h2 id="haptics-heading" class="font-headline text-headline-md font-bold text-dark-primary">
+          الاهتزاز اللمسي والنغمات التأكيدية
+        </h2>
+      </div>
+
+      <div class="space-y-2 text-body-md text-dark-on-surface">
+        <div class="p-3 rounded-lg border border-dark-on-surface/20 flex items-center justify-between">
+          <div class="font-bold">اهتزاز قوي عند بدء الاستماع</div>
+          <span class="text-success font-bold text-label-md">مفعّل</span>
+        </div>
+        <div class="p-3 rounded-lg border border-dark-on-surface/20 flex items-center justify-between">
+          <div class="font-bold">نغمة صوتية مزدوجة عند إتمام الأمر</div>
+          <span class="text-success font-bold text-label-md">مفعّل</span>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Big Bottom Save & Return Button -->
+  <footer class="sticky bottom-0 z-40 bg-dark-surface/98 border-t-2 border-dark-primary/30 px-page-margin py-3 flex items-center justify-between shadow-2xl">
+    <a href="../voice-assistant-home/VoiceAssistantHome.html" class="w-full min-h-[56px] rounded-xl bg-dark-primary text-dark-on-primary font-headline font-black text-headline-md flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all">
+      <span class="material-symbols-outlined text-2xl">check</span>
+      <span>حفظ والعودة للرئيسية</span>
+    </a>
+  </footer>
+
+  <script>
+    let currentSpeed = 1.0;
+    let isMaleVoice = true;
+
+    function setSpeed(rate, label) {
+      currentSpeed = rate;
+      document.getElementById('speed-label').textContent = label;
+      
+      const buttons = document.querySelectorAll('.speed-btn');
+      buttons.forEach(btn => {
+        btn.classList.remove('bg-dark-primary', 'text-dark-on-primary', 'border-dark-primary');
+        btn.classList.add('border-dark-on-surface/30');
+      });
+      event.target.classList.add('bg-dark-primary', 'text-dark-on-primary', 'border-dark-primary');
+      event.target.classList.remove('border-dark-on-surface/30');
+
+      speakSettings(`تم ضبط سرعة الصوت على ${label}`);
+    }
+
+    function toggleVoiceGender() {
+      isMaleVoice = !isMaleVoice;
+      const btn = document.getElementById('voice-gender-btn');
+      if (isMaleVoice) {
+        btn.textContent = "صوت ذكر (بصير)";
+        speakSettings("تم اختيار صوت بصير للرد على أوامرك.");
+      } else {
+        btn.textContent = "صوت أنثى (بصيرة)";
+        speakSettings("تم اختيار الصوت البديل للرد على أوامرك.");
+      }
+    }
+
+    function selectPersona(type) {
+      const fusha = document.getElementById('persona-fusha');
+      const darija = document.getElementById('persona-darija');
+
+      if (type === 'fusha') {
+        fusha.className = "p-4 rounded-xl border-3 border-dark-primary bg-dark-primary/10 text-right flex flex-col gap-1.5 transition-all";
+        darija.className = "p-4 rounded-xl border-2 border-dark-on-surface/30 bg-dark-surface text-right flex flex-col gap-1.5 transition-all hover:border-dark-primary";
+        speakSettings("تم تفعيل اللغة العربية الفصحى كلغة رئيسية للمساعد.");
+      } else {
+        darija.className = "p-4 rounded-xl border-3 border-dark-primary bg-dark-primary/10 text-right flex flex-col gap-1.5 transition-all";
+        fusha.className = "p-4 rounded-xl border-2 border-dark-on-surface/30 bg-dark-surface text-right flex flex-col gap-1.5 transition-all hover:border-dark-primary";
+        speakSettings("تم تفعيل الدارجة المغربية كلغة رئيسية للمساعد.");
+      }
+    }
+
+    function testCurrentSpeed() {
+      speakSettings("هذه تجربة لسرعة ونبرة الصوت الحالية في تطبيق بصير للمكفوفين.");
+    }
+
+    function speakSettingsHelp() {
+      speakSettings("أنت الآن في شاشة إعدادات الصوت. يمكنك تغيير سرعة القراءة، التبديل بين الفصحى والدارجة، وتعديل حساسية زر خفض الصوت الفيزيائي.");
+    }
+
+    function speakSettings(text) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'ar-SA';
+        utterance.rate = currentSpeed;
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+  </script>
+
+
+</body></html>

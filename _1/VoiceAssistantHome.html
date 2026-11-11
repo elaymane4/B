@@ -1,0 +1,534 @@
+<!DOCTYPE html><html lang="ar" dir="rtl"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>بصير - المساعد الصوتي للتحكم بالهاتف</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">/** @type {import('tailwindcss').Config} */
+globalThis.tailwind = globalThis.tailwind || {};
+globalThis.tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'accent': '#FFD026',
+        'success': '#10B981',
+        'error': '#EF4444',
+        'warning': '#F59E0B',
+        'listening': '#38BDF8',
+        'light-primary': '#0F172A',
+        'light-on-primary': '#FFFFFF',
+        'light-surface': '#FFFFFF',
+        'light-on-surface': '#090D16',
+        'dark-primary': '#FFD026',
+        'dark-on-primary': '#0A0A0A',
+        'dark-surface': '#0D1117',
+        'dark-on-surface': '#F3F4F6',
+      },
+      borderRadius: {
+        'sm': '8px',
+        'DEFAULT': '16px',
+        'md': '20px',
+        'lg': '24px',
+        'xl': '32px',
+        'full': '9999px',
+      },
+      spacing: {
+        'gutter-xs': '4px',
+        'gutter-sm': '8px',
+        'gutter-md': '16px',
+        'gutter-lg': '24px',
+        'gutter-xl': '32px',
+        'section': '32px',
+        'page-margin': '20px',
+      },
+      fontFamily: {
+        'display': ['"Cairo"', 'sans-serif'],
+        'headline': ['"Cairo"', 'sans-serif'],
+        'body': ['"Tajawal"', 'sans-serif'],
+        'label': ['"Cairo"', 'sans-serif'],
+      },
+      fontSize: {
+        'display-lg': ['36px', { lineHeight: '46px', letterSpacing: '-0.5px', fontWeight: '800' }],
+        'display-lg-mobile': ['30px', { lineHeight: '40px', letterSpacing: '-0.5px', fontWeight: '800' }],
+        'headline-lg': ['28px', { lineHeight: '38px', letterSpacing: '0px', fontWeight: '700' }],
+        'headline-lg-mobile': ['24px', { lineHeight: '34px', letterSpacing: '0px', fontWeight: '700' }],
+        'headline-md': ['20px', { lineHeight: '30px', letterSpacing: '0px', fontWeight: '700' }],
+        'body-lg': ['18px', { lineHeight: '28px', letterSpacing: '0px', fontWeight: '600' }],
+        'body-md': ['16px', { lineHeight: '26px', letterSpacing: '0px', fontWeight: '500' }],
+        'label-lg': ['18px', { lineHeight: '26px', letterSpacing: '0.2px', fontWeight: '700' }],
+        'label-md': ['14px', { lineHeight: '22px', letterSpacing: '0.2px', fontWeight: '700' }],
+      },
+      transitionDuration: {
+        'state-change': '120ms',
+        'surface-enter': '200ms',
+        'surface-exit': '150ms',
+      },
+      transitionDelay: {
+        'state-change': '0ms',
+        'surface-enter': '0ms',
+        'surface-exit': '0ms',
+      },
+      transitionTimingFunction: {
+        'state-change': 'ease-out',
+        'surface-enter': 'cubic-bezier(0, 0, 0.2, 1)',
+        'surface-exit': 'cubic-bezier(0.4, 0, 1, 1)',
+      },
+    },
+  },
+};
+if (typeof module !== 'undefined') module.exports = globalThis.tailwind.config;
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&amp;family=Tajawal:wght@400;500;700;800&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+  <style>
+    /* Voice Wave Pulse Animation */
+    @keyframes voiceWave {
+      0%, 100% { height: 16px; opacity: 0.6; }
+      50% { height: 48px; opacity: 1; }
+    }
+    .wave-bar-1 { animation: voiceWave 1.1s ease-in-out infinite 0.1s; }
+    .wave-bar-2 { animation: voiceWave 0.9s ease-in-out infinite 0.3s; }
+    .wave-bar-3 { animation: voiceWave 1.3s ease-in-out infinite 0.0s; }
+    .wave-bar-4 { animation: voiceWave 1.0s ease-in-out infinite 0.4s; }
+    .wave-bar-5 { animation: voiceWave 1.2s ease-in-out infinite 0.2s; }
+
+    /* Touch focus outline for low vision & screen readers */
+    button:focus-visible, [role="button"]:focus-visible {
+      outline: 3px solid #38BDF8;
+      outline-offset: 3px;
+    }
+  </style>
+</head>
+<body class="bg-dark-surface text-dark-on-surface font-body min-h-[884px] flex flex-col justify-between selection:bg-dark-primary selection:text-dark-on-primary" data-stitch-vh="min-h-[884px]===min-h-screen">
+
+  <!-- Top System & Language Switcher Bar -->
+  <header class="sticky top-0 z-30 bg-dark-surface/95 border-b-2 border-dark-primary/20 px-page-margin py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-lg bg-dark-primary flex items-center justify-center text-dark-on-primary font-headline font-black text-xl shadow-md">
+        ب
+      </div>
+      <div>
+        <h1 class="font-headline text-headline-md font-bold text-dark-primary leading-tight">بَصِير</h1>
+        <p class="text-label-md text-dark-on-surface/70 leading-none">مساعد الأوامر الصوتية</p>
+      </div>
+    </div>
+
+    <!-- Toggle Voice Dialect (Fusha / Darija) -->
+    <div class="flex items-center bg-dark-surface border-2 border-dark-on-surface/40 rounded-full p-1 gap-1">
+      <button id="btn-fusha" type="button" onclick="setLanguage(&#39;fusha&#39;)" aria-pressed="true" class="px-3 py-1.5 rounded-full font-headline font-bold text-label-md bg-dark-primary text-dark-on-primary flex items-center gap-1.5 transition-all duration-state-change" aria-label="تفعيل اللغة العربية الفصحى">
+        <span class="material-symbols-outlined text-base">language</span>
+        <span>الفصحى</span>
+      </button>
+
+      <button id="btn-darija" type="button" onclick="setLanguage(&#39;darija&#39;)" aria-pressed="false" class="px-3 py-1.5 rounded-full font-headline font-bold text-label-md text-dark-on-surface/80 hover:text-dark-on-surface flex items-center gap-1.5 transition-all duration-state-change" aria-label="تفعيل اللهجة المغربية">
+        <span class="material-symbols-outlined text-base">record_voice_over</span>
+        <span>الدارجة المغربية</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Scrollable Content -->
+  <main class="flex-1 px-page-margin py-4 flex flex-col gap-5 overflow-y-auto">
+
+    <!-- Active Assistant Interaction Card (Visual + Voice Reader Box) -->
+    <section aria-labelledby="assistant-status-title" class="rounded-xl border-3 border-dark-primary bg-dark-surface p-5 shadow-lg relative overflow-hidden">
+      <!-- Voice Wave Animation Indicator (Audio-Haptic feel) -->
+      <div class="flex items-center justify-between mb-4 border-b border-dark-on-surface/20 pb-3">
+        <div class="flex items-center gap-2.5">
+          <span class="relative flex h-4 w-4">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-listening opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-4 w-4 bg-listening"></span>
+          </span>
+          <h2 id="assistant-status-title" class="font-headline text-label-lg font-bold text-listening">
+            بصير يستمع إليك الآن...
+          </h2>
+        </div>
+        
+        <!-- Quick Screen Reader Speak Button -->
+        <button type="button" onclick="speakCurrentStatus()" class="flex items-center gap-1.5 bg-dark-primary/20 text-dark-primary hover:bg-dark-primary hover:text-dark-on-primary border border-dark-primary/60 px-3 py-1.5 rounded-lg text-label-md font-bold transition-all" aria-label="إعادة نطق محتوى الشاشة بصوت بصير">
+          <span class="material-symbols-outlined text-lg">volume_up</span>
+          <span>إعادة النطق</span>
+        </button>
+      </div>
+
+      <!-- Assistant Spoken Response Display -->
+      <div class="space-y-3">
+        <p id="assistant-bubble" class="font-body text-body-lg text-dark-on-surface font-semibold leading-relaxed">
+          &#34;مرحباً بك! هاتفك جاهز لتلقي الأوامر الصوتية. ماذا تود أن أفعل؟ يمكنك القول: <span class="text-dark-primary underline font-bold">&#39;اتصل بأمي&#39;</span> أو <span class="text-dark-primary underline font-bold">&#39;كم الوقت الآن&#39;</span> أو اختر أمراً من القائمة أدناه.&#34;
+        </p>
+      </div>
+
+      <!-- Real-time Audio Waves Visualization -->
+      <div class="mt-4 pt-3 border-t border-dark-on-surface/20 flex items-center justify-center gap-2 h-12" aria-hidden="true">
+        <span class="w-1.5 bg-listening rounded-full wave-bar-1"></span>
+        <span class="w-1.5 bg-dark-primary rounded-full wave-bar-2"></span>
+        <span class="w-1.5 bg-listening rounded-full wave-bar-3"></span>
+        <span class="w-1.5 bg-dark-primary rounded-full wave-bar-4"></span>
+        <span class="w-1.5 bg-listening rounded-full wave-bar-5"></span>
+        <span class="w-1.5 bg-dark-primary rounded-full wave-bar-2"></span>
+        <span class="w-1.5 bg-listening rounded-full wave-bar-1"></span>
+      </div>
+    </section>
+
+    <!-- Physical Hardware Key Feature Banner -->
+    <a href="../hardware-button-settings/HardwareButtonSettings.html" class="rounded-xl border-2 border-listening/60 bg-dark-primary/10 hover:bg-dark-primary/15 p-4 flex items-center justify-between gap-3 active:scale-[0.99] transition-all group" aria-label="التحكم عبر زر خفض الصوت الفيزيائي، اضغط لمعرفة التفاصيل وتجربته">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-lg bg-dark-primary text-dark-on-primary flex items-center justify-center shrink-0 border-2 border-listening shadow-md">
+          <span class="material-symbols-outlined text-3xl font-bold">volume_down</span>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h2 class="font-headline text-label-lg font-bold text-dark-primary group-hover:text-listening">
+              زر خفض الصوت الفيزيائي
+            </h2>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-success/20 text-success border border-success font-bold">
+              يعمل والشاشة مقفلة
+            </span>
+          </div>
+          <p class="text-body-md text-dark-on-surface/80 mt-0.5">
+            اضغط باستمرار للتحدث • ارفع يدك للتنفيذ الفوري للأمر
+          </p>
+        </div>
+      </div>
+      <span class="material-symbols-outlined text-2xl text-listening group-hover:translate-x-1 transition-transform">
+        arrow_back
+      </span>
+    </a>
+
+    <!-- Specific Dedicated Section Requested: "خانة خاصة بالأوامر الصوتية" -->
+    <section aria-labelledby="voice-commands-heading" class="rounded-xl border-2 border-listening/40 bg-dark-surface p-4 flex flex-col gap-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2 text-dark-primary">
+          <span class="material-symbols-outlined text-2xl font-bold">record_voice_over</span>
+          <h2 id="voice-commands-heading" class="font-headline text-headline-md font-bold text-dark-primary">
+            الأوامر الصوتية السريعة
+          </h2>
+        </div>
+        <span class="text-label-md px-2.5 py-0.5 rounded-full bg-dark-primary/15 text-dark-primary font-bold border border-dark-primary/40">
+          انطق أو اضغط
+        </span>
+      </div>
+      <p class="text-body-md text-dark-on-surface/80">
+        أوامر جاهزة ومجهزة للتحكم الشامل بوظائف الهاتف للمكفوفين، اضغط على أي أمر لسماعه وتنفيذه فوراً:
+      </p>
+
+      <!-- Fusha Commands Grid (Default) -->
+      <div id="commands-fusha" class="grid grid-cols-1 gap-2.5">
+        <!-- Fusha 1 -->
+        <button type="button" onclick="triggerVoiceCommand(&#39;اتصل بـ أمي&#39;, &#39;جاري الاتصال بـ أمي...&#39;)" class="w-full text-right p-3.5 rounded-lg border-2 border-dark-on-surface/30 hover:border-dark-primary bg-dark-surface active:bg-dark-primary/10 flex items-center justify-between gap-3 group transition-all">
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-lg bg-success/20 text-success border border-success flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-2xl">call</span>
+            </div>
+            <div>
+              <div class="font-headline text-label-lg font-bold text-dark-on-surface group-hover:text-dark-primary">&#34;اتصل بـ [الاسم]&#34;</div>
+              <div class="text-body-md text-dark-on-surface/70">إجراء مكالمة هاتفية فورية</div>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-listening text-2xl group-hover:scale-110 transition-transform">play_circle</span>
+        </button>
+
+        <!-- Fusha 2 -->
+        <button type="button" onclick="triggerVoiceCommand(&#39;اقرأ الرسائل الجديدة&#39;, &#39;لديك ثلاث رسائل واردة جديدة: الأولى من أحمد...&#39;)" class="w-full text-right p-3.5 rounded-lg border-2 border-dark-on-surface/30 hover:border-dark-primary bg-dark-surface active:bg-dark-primary/10 flex items-center justify-between gap-3 group transition-all">
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-lg bg-listening/20 text-listening border border-listening flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-2xl">mark_chat_unread</span>
+            </div>
+            <div>
+              <div class="font-headline text-label-lg font-bold text-dark-on-surface group-hover:text-dark-primary">&#34;اقرأ الرسائل الجديدة&#34;</div>
+              <div class="text-body-md text-dark-on-surface/70">قراءة الرسائل والتنبيهات صوتياً</div>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-listening text-2xl group-hover:scale-110 transition-transform">play_circle</span>
+        </button>
+
+        <!-- Fusha 3 -->
+        <button type="button" onclick="triggerVoiceCommand(&#39;كم الوقت ومستوى البطارية؟&#39;, &#39;الوقت الآن العاشرة والربع صباحاً، ونسبة شحن البطارية 85%.&#39;)" class="w-full text-right p-3.5 rounded-lg border-2 border-dark-on-surface/30 hover:border-dark-primary bg-dark-surface active:bg-dark-primary/10 flex items-center justify-between gap-3 group transition-all">
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-lg bg-dark-primary/20 text-dark-primary border border-dark-primary flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-2xl">schedule</span>
+            </div>
+            <div>
+              <div class="font-headline text-label-lg font-bold text-dark-on-surface group-hover:text-dark-primary">&#34;كم الوقت والبطارية؟&#34;</div>
+              <div class="text-body-md text-dark-on-surface/70">معرفة الوقت الحالي وحالة البطارية</div>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-listening text-2xl group-hover:scale-110 transition-transform">play_circle</span>
+        </button>
+
+        <!-- Fusha 4 -->
+        <button type="button" onclick="triggerVoiceCommand(&#39;تعرّف على المحيط أمامي&#39;, &#39;تشغيل الكاميرا الذكية: يوجد مقعد على مسافة متر واحد وطاولة أمامك.&#39;)" class="w-full text-right p-3.5 rounded-lg border-2 border-dark-on-surface/30 hover:border-dark-primary bg-dark-surface active:bg-dark-primary/10 flex items-center justify-between gap-3 group transition-all">
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-lg bg-warning/20 text-warning border border-warning flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-2xl">visibility</span>
+            </div>
+            <div>
+              <div class="font-headline text-label-lg font-bold text-dark-on-surface group-hover:text-dark-primary">&#34;ماذا يوجد أمامي؟ (الكاميرا)&#34;</div>
+              <div class="text-body-md text-dark-on-surface/70">وصف دقيق للأشياء والعقبات أمامك</div>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-listening text-2xl group-hover:scale-110 transition-transform">play_circle</span>
+        </button>
+
+        <!-- Fusha 5 -->
+        <button type="button" onclick="triggerVoiceCommand(&#39;أين أنا الآن؟&#39;, &#39;أنت الآن في شارع محمد الخامس بالقرب من محطة الحافلات.&#39;)" class="w-full text-right p-3.5 rounded-lg border-2 border-dark-on-surface/30 hover:border-dark-primary bg-dark-surface active:bg-dark-primary/10 flex items-center justify-between gap-3 group transition-all">
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-lg bg-accent/20 text-dark-primary border border-dark-primary flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-2xl">location_on</span>
+            </div>
+            <div>
+              <div class="font-headline text-label-lg font-bold text-dark-on-surface group-hover:text-dark-primary">&#34;أين أنا الآن؟ (الموقع)&#34;</div>
+              <div class="text-body-md text-dark-on-surface/70">نطق العنوان الحالي والمكان بدقة</div>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-listening text-2xl group-hover:scale-110 transition-transform">play_circle</span>
+        </button>
+      </div>
+
+      <!-- Darija Commands Grid (Hidden initially) -->
+      <div id="commands-darija" class="grid grid-cols-1 gap-2.5 hidden">
+        <!-- Command 1: Call -->
+        <button type="button" onclick="triggerVoiceCommand(&#39;عيط لـ ماما&#39;, &#39;جاري الاتصال بـ ماما...&#39;)" class="w-full text-right p-3.5 rounded-lg border-2 border-dark-on-surface/30 hover:border-dark-primary bg-dark-surface active:bg-dark-primary/10 flex items-center justify-between gap-3 group transition-all">
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-lg bg-success/20 text-success border border-success flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-2xl">call</span>
+            </div>
+            <div>
+              <div class="font-headline text-label-lg font-bold text-dark-on-surface group-hover:text-dark-primary">&#34;عيط لـ [الاسم]&#34;</div>
+              <div class="text-body-md text-dark-on-surface/70">إجراء مكالمة هاتفية صوتية فورية بالدارجة</div>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-listening text-2xl group-hover:scale-110 transition-transform">play_circle</span>
+        </button>
+
+        <!-- Command 2: Read Messages -->
+        <button type="button" onclick="triggerVoiceCommand(&#39;قرا ليا الميساجات الجداد&#39;, &#39;عندك 3 رسائل جداد: رسالة من خويا أمين على واتساب...&#39;)" class="w-full text-right p-3.5 rounded-lg border-2 border-dark-on-surface/30 hover:border-dark-primary bg-dark-surface active:bg-dark-primary/10 flex items-center justify-between gap-3 group transition-all">
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-lg bg-listening/20 text-listening border border-listening flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-2xl">mark_chat_unread</span>
+            </div>
+            <div>
+              <div class="font-headline text-label-lg font-bold text-dark-on-surface group-hover:text-dark-primary">&#34;قرا ليا الميساجات&#34;</div>
+              <div class="text-body-md text-dark-on-surface/70">قراءة الرسائل والواتساب بالدارجة</div>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-listening text-2xl group-hover:scale-110 transition-transform">play_circle</span>
+        </button>
+
+        <!-- Command 3: Battery & Time -->
+        <button type="button" onclick="triggerVoiceCommand(&#39;شحال في الساعة والباتري؟&#39;, &#39;الساعة دابا 10:15 صباحاً، ونسبة الشحن 85% والويفي خدام.&#39;)" class="w-full text-right p-3.5 rounded-lg border-2 border-dark-on-surface/30 hover:border-dark-primary bg-dark-surface active:bg-dark-primary/10 flex items-center justify-between gap-3 group transition-all">
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-lg bg-dark-primary/20 text-dark-primary border border-dark-primary flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-2xl">schedule</span>
+            </div>
+            <div>
+              <div class="font-headline text-label-lg font-bold text-dark-on-surface group-hover:text-dark-primary">&#34;شحال في الساعة والباتري؟&#34;</div>
+              <div class="text-body-md text-dark-on-surface/70">معرفة الوقت ونسبة شحن البطارية</div>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-listening text-2xl group-hover:scale-110 transition-transform">play_circle</span>
+        </button>
+
+        <!-- Command 4: Identify Surrounding Camera -->
+        <button type="button" onclick="triggerVoiceCommand(&#39;شنو كاين قدامي؟&#39;, &#39;فتح الكاميرا الذكية: كاين كرسي على بُعد متر وطاولة قدامك.&#39;)" class="w-full text-right p-3.5 rounded-lg border-2 border-dark-on-surface/30 hover:border-dark-primary bg-dark-surface active:bg-dark-primary/10 flex items-center justify-between gap-3 group transition-all">
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-lg bg-warning/20 text-warning border border-warning flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-2xl">visibility</span>
+            </div>
+            <div>
+              <div class="font-headline text-label-lg font-bold text-dark-on-surface group-hover:text-dark-primary">&#34;شنو كاين قدامي؟ (الكاميرا)&#34;</div>
+              <div class="text-body-md text-dark-on-surface/70">التعرف الصوتي على الأغراض والمحيط</div>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-listening text-2xl group-hover:scale-110 transition-transform">play_circle</span>
+        </button>
+
+        <!-- Command 5: Location -->
+        <button type="button" onclick="triggerVoiceCommand(&#39;فين أنا دابا؟&#39;, &#39;أنت دابا في شارع محمد الخامس، قرب محطة الترامواي.&#39;)" class="w-full text-right p-3.5 rounded-lg border-2 border-dark-on-surface/30 hover:border-dark-primary bg-dark-surface active:bg-dark-primary/10 flex items-center justify-between gap-3 group transition-all">
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-lg bg-accent/20 text-dark-primary border border-dark-primary flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-2xl">location_on</span>
+            </div>
+            <div>
+              <div class="font-headline text-label-lg font-bold text-dark-on-surface group-hover:text-dark-primary">&#34;فين أنا دابا؟ (الموقع)&#34;</div>
+              <div class="text-body-md text-dark-on-surface/70">تحديد موقعك الجغرافي ونطقه صوتياً</div>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-listening text-2xl group-hover:scale-110 transition-transform">play_circle</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Tactile Quick Phone Tools for Blind Users -->
+    <section aria-label="أدوات الوصول السريع" class="grid grid-cols-2 gap-3 mb-2">
+      <!-- High-contrast Flashlight / SOS -->
+      <button type="button" onclick="triggerVoiceCommand(&#39;شعل الضو (الكشاف)&#39;, &#39;تم تشغيل كشاف الهاتف بأقصى إضاءة.&#39;)" class="p-4 rounded-xl border-2 border-dark-on-surface/30 hover:border-dark-primary bg-dark-surface active:scale-95 flex flex-col items-center justify-center gap-2 text-center">
+        <div class="w-12 h-12 rounded-full bg-accent/20 text-dark-primary border-2 border-dark-primary flex items-center justify-center">
+          <span class="material-symbols-outlined text-2xl">flashlight_on</span>
+        </div>
+        <span class="font-headline text-label-lg font-bold text-dark-on-surface">الكشاف (الضو)</span>
+        <span class="text-label-md text-dark-on-surface/70">اضغط أو انطق</span>
+      </button>
+
+      <!-- Battery & Status Sound -->
+      <button type="button" onclick="triggerVoiceCommand(&#39;شحال في الباتري؟&#39;, &#39;البطارية مشحونة بنسبة 85 بالمائة، تكفيك ليوم كامل.&#39;)" class="p-4 rounded-xl border-2 border-dark-on-surface/30 hover:border-listening bg-dark-surface active:scale-95 flex flex-col items-center justify-center gap-2 text-center">
+        <div class="w-12 h-12 rounded-full bg-listening/20 text-listening border-2 border-listening flex items-center justify-center">
+          <span class="material-symbols-outlined text-2xl">battery_charging_full</span>
+        </div>
+        <span class="font-headline text-label-lg font-bold text-dark-on-surface">البطارية (الشارور)</span>
+        <span class="text-label-md text-dark-on-surface/70">85% مشحون</span>
+      </button>
+    </section>
+
+  </main>
+
+  <!-- Large Tactile Voice Microphone Dock (Primary Action Area) -->
+  <footer class="sticky bottom-0 z-40 bg-dark-surface/98 border-t-2 border-dark-primary/30 px-page-margin py-4 flex flex-col items-center gap-2 shadow-2xl">
+    <div class="w-full flex items-center justify-between text-label-md font-bold text-dark-on-surface/75 px-2">
+      <span class="flex items-center gap-1.5">
+        <span class="w-2.5 h-2.5 rounded-full bg-success"></span>
+        <span id="footer-lang-label">اللغة العربية الفصحى مفعّلة</span>
+      </span>
+      <span class="text-listening">اضغط وتكلّم مباشرة</span>
+    </div>
+
+    <!-- Huge Central Accessible Microphone Button (>= 80px for Blind accessibility) -->
+    <div class="relative flex items-center justify-center my-1">
+      <!-- Outer Pulsing Ring when active -->
+      <div id="mic-pulse" class="absolute w-24 h-24 rounded-full bg-dark-primary/20 animate-ping pointer-events-none"></div>
+
+      <button id="main-voice-button" type="button" onclick="toggleMainMicrophone()" class="relative w-20 h-20 rounded-full bg-dark-primary text-dark-on-primary border-4 border-listening shadow-2xl flex items-center justify-center active:scale-90 transition-all duration-state-change focus:ring-4 focus:ring-listening" aria-label="تحدث الآن، اضغط للبدء أو الإيقاف">
+        <span id="mic-icon" class="material-symbols-outlined text-4xl" style="font-variation-settings: &#39;FILL&#39; 1;">mic</span>
+      </button>
+    </div>
+
+    <p id="mic-instruction" class="text-label-md text-dark-primary font-bold text-center tracking-wide">
+      انقر هنا وتكلّم باللغة العربية الفصحى أو الدارجة
+    </p>
+  </footer>
+
+  <!-- Interactive Demo Logic for Voice Simulation & Dialect Switching -->
+  <script>
+    let currentDialect = 'fusha';
+    let isListening = true;
+
+    function setLanguage(lang) {
+      currentDialect = lang;
+      const btnDarija = document.getElementById('btn-darija');
+      const btnFusha = document.getElementById('btn-fusha');
+      const commandsDarija = document.getElementById('commands-darija');
+      const commandsFusha = document.getElementById('commands-fusha');
+      const bubble = document.getElementById('assistant-bubble');
+      const statusTitle = document.getElementById('assistant-status-title');
+      const footerLang = document.getElementById('footer-lang-label');
+
+      if (lang === 'darija') {
+        btnDarija.classList.add('bg-dark-primary', 'text-dark-on-primary');
+        btnDarija.classList.remove('text-dark-on-surface/80');
+        btnDarija.setAttribute('aria-pressed', 'true');
+
+        btnFusha.classList.remove('bg-dark-primary', 'text-dark-on-primary');
+        btnFusha.classList.add('text-dark-on-surface/80');
+        btnFusha.setAttribute('aria-pressed', 'false');
+
+        commandsDarija.classList.remove('hidden');
+        commandsFusha.classList.add('hidden');
+
+        statusTitle.textContent = "بصير في الاستماع دابا...";
+        bubble.innerHTML = `"أهلاً بك! هاتف ديالك جاهز. شنو بغيتي ندير؟ تقدر تقول: <span class='text-dark-primary underline font-bold'>'عيط لـ أمي'</span> أو <span class='text-dark-primary underline font-bold'>'شحال في الساعة'</span> أو اختار من الأوامر لتحت."`;
+        footerLang.textContent = "الدارجة المغربية مفعّلة";
+        playTone();
+      } else {
+        btnFusha.classList.add('bg-dark-primary', 'text-dark-on-primary');
+        btnFusha.classList.remove('text-dark-on-surface/80');
+        btnFusha.setAttribute('aria-pressed', 'true');
+
+        btnDarija.classList.remove('bg-dark-primary', 'text-dark-on-primary');
+        btnDarija.classList.add('text-dark-on-surface/80');
+        btnDarija.setAttribute('aria-pressed', 'false');
+
+        commandsFusha.classList.remove('hidden');
+        commandsDarija.classList.add('hidden');
+
+        statusTitle.textContent = "بصير يستمع إليك الآن...";
+        bubble.innerHTML = `"مرحباً بك! هاتفك جاهز لتلقي الأوامر. ماذا تود أن أفعل؟ يمكنك القول: <span class='text-dark-primary underline font-bold'>'اتصل بأمي'</span> أو <span class='text-dark-primary underline font-bold'>'كم الوقت الآن'</span>."`;
+        footerLang.textContent = "اللغة العربية الفصحى مفعّلة";
+        playTone();
+      }
+    }
+
+    function triggerVoiceCommand(commandText, responseText) {
+      const bubble = document.getElementById('assistant-bubble');
+      const statusTitle = document.getElementById('assistant-status-title');
+      
+      statusTitle.textContent = `تم استقبال الأمر: "${commandText}"`;
+      bubble.innerHTML = `<span class="text-listening font-bold">سمعت:</span> "${commandText}"<br><span class="text-dark-primary font-bold">الجواب:</span> ${responseText}`;
+      
+      playTone();
+      
+      // Accessibility audio readout using SpeechSynthesis if supported
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(responseText);
+        utterance.lang = 'ar-SA';
+        utterance.rate = 0.95;
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    function speakCurrentStatus() {
+      const bubble = document.getElementById('assistant-bubble');
+      const text = bubble.innerText;
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'ar-SA';
+        utterance.rate = 0.95;
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    function toggleMainMicrophone() {
+      isListening = !isListening;
+      const micPulse = document.getElementById('mic-pulse');
+      const micIcon = document.getElementById('mic-icon');
+      const micInstruction = document.getElementById('mic-instruction');
+      const statusTitle = document.getElementById('assistant-status-title');
+
+      if (isListening) {
+        micPulse.classList.remove('hidden');
+        micIcon.textContent = 'mic';
+        micInstruction.textContent = currentDialect === 'darija' ? 'كنسمعك دابا... تكلّم' : 'أستمع إليك الآن... تفضل';
+        statusTitle.textContent = currentDialect === 'darija' ? 'بصير في الاستماع دابا...' : 'بصير يستمع إليك الآن...';
+      } else {
+        micPulse.classList.add('hidden');
+        micIcon.textContent = 'mic_off';
+        micInstruction.textContent = 'الميكروفون متوقف - انقر للتفعيل';
+        statusTitle.textContent = 'المساعد في وضع السكون';
+      }
+      playTone();
+    }
+
+    // Audio chime simulation using Web Audio API for tactile blind feedback
+    function playTone() {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+        osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15); // A5
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.15);
+      } catch (e) {
+        // AudioContext not allowed or not supported in silent mode
+      }
+    }
+  </script>
+
+
+</body></html>

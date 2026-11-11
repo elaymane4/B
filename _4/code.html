@@ -1,0 +1,355 @@
+<!DOCTYPE html><html lang="ar" dir="rtl"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>بصير - وضع الاستماع أثناء قفل الشاشة</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">/** @type {import('tailwindcss').Config} */
+globalThis.tailwind = globalThis.tailwind || {};
+globalThis.tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'accent': '#FFD026',
+        'success': '#10B981',
+        'error': '#EF4444',
+        'warning': '#F59E0B',
+        'listening': '#38BDF8',
+        'light-primary': '#0F172A',
+        'light-on-primary': '#FFFFFF',
+        'light-surface': '#FFFFFF',
+        'light-on-surface': '#090D16',
+        'dark-primary': '#FFD026',
+        'dark-on-primary': '#0A0A0A',
+        'dark-surface': '#0D1117',
+        'dark-on-surface': '#F3F4F6',
+      },
+      borderRadius: {
+        'sm': '8px',
+        'DEFAULT': '16px',
+        'md': '20px',
+        'lg': '24px',
+        'xl': '32px',
+        'full': '9999px',
+      },
+      spacing: {
+        'gutter-xs': '4px',
+        'gutter-sm': '8px',
+        'gutter-md': '16px',
+        'gutter-lg': '24px',
+        'gutter-xl': '32px',
+        'section': '32px',
+        'page-margin': '20px',
+      },
+      fontFamily: {
+        'display': ['"Cairo"', 'sans-serif'],
+        'headline': ['"Cairo"', 'sans-serif'],
+        'body': ['"Tajawal"', 'sans-serif'],
+        'label': ['"Cairo"', 'sans-serif'],
+      },
+      fontSize: {
+        'display-lg': ['36px', { lineHeight: '46px', letterSpacing: '-0.5px', fontWeight: '800' }],
+        'display-lg-mobile': ['30px', { lineHeight: '40px', letterSpacing: '-0.5px', fontWeight: '800' }],
+        'headline-lg': ['28px', { lineHeight: '38px', letterSpacing: '0px', fontWeight: '700' }],
+        'headline-lg-mobile': ['24px', { lineHeight: '34px', letterSpacing: '0px', fontWeight: '700' }],
+        'headline-md': ['20px', { lineHeight: '30px', letterSpacing: '0px', fontWeight: '700' }],
+        'body-lg': ['18px', { lineHeight: '28px', letterSpacing: '0px', fontWeight: '600' }],
+        'body-md': ['16px', { lineHeight: '26px', letterSpacing: '0px', fontWeight: '500' }],
+        'label-lg': ['18px', { lineHeight: '26px', letterSpacing: '0.2px', fontWeight: '700' }],
+        'label-md': ['14px', { lineHeight: '22px', letterSpacing: '0.2px', fontWeight: '700' }],
+      },
+      transitionDuration: {
+        'state-change': '120ms',
+        'surface-enter': '200ms',
+        'surface-exit': '150ms',
+      },
+      transitionDelay: {
+        'state-change': '0ms',
+        'surface-enter': '0ms',
+        'surface-exit': '0ms',
+      },
+      transitionTimingFunction: {
+        'state-change': 'ease-out',
+        'surface-enter': 'cubic-bezier(0, 0, 0.2, 1)',
+        'surface-exit': 'cubic-bezier(0.4, 0, 1, 1)',
+      },
+    },
+  },
+};
+if (typeof module !== 'undefined') module.exports = globalThis.tailwind.config;
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&amp;family=Tajawal:wght@400;500;700;800&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+  <style>
+    /* Ultra-low power OLED pure black look for blind users */
+    body {
+      background-color: #000000;
+    }
+    @keyframes subtleGlow {
+      0%, 100% { opacity: 0.3; transform: scale(0.98); }
+      50% { opacity: 0.9; transform: scale(1.04); }
+    }
+    .listening-glow {
+      animation: subtleGlow 1.4s ease-in-out infinite;
+    }
+    @keyframes wavePulse {
+      0%, 100% { height: 8px; }
+      50% { height: 36px; }
+    }
+    .wave-line-1 { animation: wavePulse 1s ease-in-out infinite 0.1s; }
+    .wave-line-2 { animation: wavePulse 0.8s ease-in-out infinite 0.3s; }
+    .wave-line-3 { animation: wavePulse 1.2s ease-in-out infinite 0s; }
+    .wave-line-4 { animation: wavePulse 0.9s ease-in-out infinite 0.2s; }
+    .wave-line-5 { animation: wavePulse 1.1s ease-in-out infinite 0.4s; }
+
+    button:focus-visible, [role="button"]:focus-visible {
+      outline: 3px solid #38BDF8;
+      outline-offset: 3px;
+    }
+  </style>
+</head>
+<body class="bg-black text-dark-on-surface font-body min-h-[884px] flex flex-col justify-between p-page-margin select-none" data-stitch-vh="min-h-[884px]===min-h-screen">
+
+  <!-- Top Lock Screen Status Bar (Minimal AMOLED Display) -->
+  <header class="flex items-center justify-between py-2 border-b border-white/10">
+    <div class="flex items-center gap-2">
+      <span class="material-symbols-outlined text-xl text-dark-on-surface/60">lock</span>
+      <span class="font-headline text-label-md font-bold text-dark-on-surface/60">الشاشة مقفلة</span>
+    </div>
+
+    <!-- Live Time & Battery for Low-Vision users -->
+    <div class="flex items-center gap-3 text-label-md font-bold text-dark-on-surface/80 tabular-nums">
+      <span id="current-lock-time">10:15 ص</span>
+      <span class="flex items-center gap-1 text-success">
+        <span class="material-symbols-outlined text-base">battery_charging_full</span>
+        <span>85%</span>
+      </span>
+    </div>
+  </header>
+
+  <!-- Central Interaction Area: Reacts to Volume Down Hold/Release -->
+  <main class="flex-1 flex flex-col items-center justify-center text-center gap-6 py-8">
+
+    <!-- Active Listening Glow Ring (Appears when Volume Down is held) -->
+    <div class="relative flex items-center justify-center">
+      <div id="listening-halo" class="absolute w-44 h-44 rounded-full bg-listening/20 listening-glow pointer-events-none hidden"></div>
+      <div id="holding-halo" class="absolute w-36 h-36 rounded-full bg-dark-primary/20 pointer-events-none hidden"></div>
+
+      <!-- Main Visual Cue Button / Indicator -->
+      <div id="lock-mic-core" class="w-28 h-28 rounded-full border-4 border-white/20 bg-dark-surface flex items-center justify-center transition-all duration-300 shadow-2xl">
+        <span id="lock-mic-icon" class="material-symbols-outlined text-5xl text-white/50" style="font-variation-settings: &#39;FILL&#39; 1;">
+          volume_down
+        </span>
+      </div>
+    </div>
+
+    <!-- Status Message Text (Spoken out loud via TTS) -->
+    <div class="space-y-3 max-w-sm">
+      <h1 id="lock-status-title" class="font-headline text-headline-lg font-black text-white">
+        اضغط باستمرار على زر خفض الصوت
+      </h1>
+      <p id="lock-status-desc" class="text-body-lg text-dark-on-surface/75 font-semibold">
+        الشاشة مقفلة لتوفير البطارية. المساعد الصوتي &#34;بصير&#34; جاهز لسماع أوامرك في أي لحظة.
+      </p>
+    </div>
+
+    <!-- Spoken Feedback Bubble (Visible on screen and spoken by audio) -->
+    <div id="lock-transcript-box" class="w-full max-w-sm bg-white/5 border-2 border-white/10 rounded-2xl p-4 text-right space-y-2 hidden">
+      <div class="flex items-center justify-between text-label-md">
+        <span class="text-listening font-bold flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-base">hearing</span>
+          <span id="lock-sensor-status">جاري الاستماع الآن...</span>
+        </span>
+        <span class="text-dark-primary font-bold">اللغة الفصحى</span>
+      </div>
+
+      <div class="text-body-lg text-white font-bold leading-relaxed pt-1" id="lock-transcript-text">
+        &#34;اتصل بأمي&#34;
+      </div>
+
+      <!-- Sound Waves animation -->
+      <div id="lock-sound-waves" class="flex items-center justify-center gap-2 pt-2 h-10 border-t border-white/10">
+        <span class="w-1.5 bg-listening rounded-full wave-line-1"></span>
+        <span class="w-1.5 bg-dark-primary rounded-full wave-line-2"></span>
+        <span class="w-1.5 bg-listening rounded-full wave-line-3"></span>
+        <span class="w-1.5 bg-dark-primary rounded-full wave-line-4"></span>
+        <span class="w-1.5 bg-listening rounded-full wave-line-5"></span>
+      </div>
+
+      <!-- Output spoken response -->
+      <div id="lock-execution-result" class="pt-2 border-t border-white/10 text-success text-body-md font-bold hidden">
+        <span class="material-symbols-outlined text-lg align-middle">check_circle</span>
+        <span id="lock-response-speech">جاري الاتصال بـ أمي...</span>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Interactive Simulation Trigger (Simulates pressing volume down on real phone) -->
+  <footer class="flex flex-col gap-3 py-2 border-t border-white/10">
+    <div class="text-center text-label-md text-dark-on-surface/60 font-bold">
+      [محاكاة ضغط زر خفض الصوت الفيزيائي أثناء قفل الشاشة]
+    </div>
+
+    <!-- Big tactile button for testing the user's specific trigger on canvas -->
+    <button id="test-vol-down-touch" type="button" onmousedown="pressVolDown(event)" onmouseup="releaseVolDown(event)" ontouchstart="pressVolDown(event)" ontouchend="releaseVolDown(event)" class="w-full min-h-[64px] rounded-xl bg-dark-primary text-dark-on-primary font-headline font-black text-headline-md flex items-center justify-center gap-3 border-2 border-listening shadow-xl active:scale-95 transition-all" aria-label="اضغط مطولاً للتحدث ثم ارفع يدك للتنفيذ">
+      <span class="material-symbols-outlined text-3xl font-bold">volume_down</span>
+      <span id="btn-touch-label">اضغط مطولاً للتحدث • ارفع يدك للتنفيذ</span>
+    </button>
+
+    <div class="flex items-center justify-between text-label-md text-white/50 pt-1">
+      <a href="../voice-assistant-home/VoiceAssistantHome.html" class="hover:text-dark-primary flex items-center gap-1">
+        <span class="material-symbols-outlined text-base">lock_open</span>
+        <span>فتح قفل الشاشة للرئيسية</span>
+      </a>
+      <a href="../hardware-button-settings/HardwareButtonSettings.html" class="hover:text-listening flex items-center gap-1">
+        <span class="material-symbols-outlined text-base">settings</span>
+        <span>إعدادات الزر</span>
+      </a>
+    </div>
+  </footer>
+
+  <script>
+    let isPressed = false;
+    let pressStartTime = 0;
+    let sampleCounter = 0;
+
+    const lockedCommands = [
+      { text: "اتصل بأمي", reply: "جاري الاتصال بـ أمي عبر الهاتف..." },
+      { text: "كم الوقت الآن؟", reply: "الوقت الآن العاشرة وخمس عشرة دقيقة صباحاً." },
+      { text: "اقرأ آخر رسالة واردة", reply: "رسالة جديدة من أحمد: سأمر عليك بعد نصف ساعة." },
+      { text: "شغل الكشاف", reply: "تم تشغيل كشاف الهاتف." }
+    ];
+
+    function pressVolDown(e) {
+      if (e) e.preventDefault();
+      if (isPressed) return;
+      isPressed = true;
+      pressStartTime = Date.now();
+
+      const halo = document.getElementById('listening-halo');
+      const micCore = document.getElementById('lock-mic-core');
+      const micIcon = document.getElementById('lock-mic-icon');
+      const title = document.getElementById('lock-status-title');
+      const desc = document.getElementById('lock-status-desc');
+      const transcriptBox = document.getElementById('lock-transcript-box');
+      const transcriptText = document.getElementById('lock-transcript-text');
+      const resultBox = document.getElementById('lock-execution-result');
+      const soundWaves = document.getElementById('lock-sound-waves');
+      const btnLabel = document.getElementById('btn-touch-label');
+      const sensorStatus = document.getElementById('lock-sensor-status');
+
+      halo.classList.remove('hidden');
+      transcriptBox.classList.remove('hidden');
+      soundWaves.classList.remove('hidden');
+      resultBox.classList.add('hidden');
+
+      micCore.classList.remove('border-white/20');
+      micCore.classList.add('border-listening', 'bg-listening/20');
+      micIcon.textContent = 'mic';
+      micIcon.classList.remove('text-white/50');
+      micIcon.classList.add('text-listening');
+
+      title.textContent = "يستمع إليك الآن...";
+      desc.textContent = "تحدث بأمرك الصوتي، وبمجرد رفع يدك سيتم تنفيذه فوراً.";
+      btnLabel.textContent = "جاري التقاط الصوت... ارفع يدك للتنفيذ";
+
+      const current = lockedCommands[sampleCounter % lockedCommands.length];
+      transcriptText.textContent = `"${current.text}"`;
+      sensorStatus.textContent = "زر خفض الصوت مضغوط • الميكروفون نشط";
+
+      playLockBeep(523.25, 0.1); // C5
+      if (navigator.vibrate) navigator.vibrate(70);
+    }
+
+    function releaseVolDown(e) {
+      if (e) e.preventDefault();
+      if (!isPressed) return;
+      isPressed = false;
+      const duration = Date.now() - pressStartTime;
+
+      const halo = document.getElementById('listening-halo');
+      const micCore = document.getElementById('lock-mic-core');
+      const micIcon = document.getElementById('lock-mic-icon');
+      const title = document.getElementById('lock-status-title');
+      const desc = document.getElementById('lock-status-desc');
+      const resultBox = document.getElementById('lock-execution-result');
+      const responseSpeech = document.getElementById('lock-response-speech');
+      const soundWaves = document.getElementById('lock-sound-waves');
+      const btnLabel = document.getElementById('btn-touch-label');
+      const sensorStatus = document.getElementById('lock-sensor-status');
+
+      halo.classList.add('hidden');
+      soundWaves.classList.add('hidden');
+      btnLabel.textContent = "اضغط مطولاً للتحدث • ارفع يدك للتنفيذ";
+
+      micCore.classList.remove('border-listening', 'bg-listening/20');
+      micCore.classList.add('border-success', 'bg-success/20');
+      micIcon.textContent = 'done';
+      micIcon.classList.remove('text-listening');
+      micIcon.classList.add('text-success');
+
+      const current = lockedCommands[sampleCounter % lockedCommands.length];
+      sampleCounter++;
+
+      title.textContent = "تم إطلاق الأمر وتنفيذه!";
+      desc.textContent = current.reply;
+      sensorStatus.textContent = "تم رفع اليد • اكتمل التنفيذ";
+
+      resultBox.classList.remove('hidden');
+      responseSpeech.textContent = current.reply;
+
+      playLockBeep(880, 0.15); // A5
+      if (navigator.vibrate) navigator.vibrate([60, 40, 60]);
+
+      // Voice response
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(current.reply);
+        utterance.lang = 'ar-SA';
+        utterance.rate = 0.95;
+        window.speechSynthesis.speak(utterance);
+      }
+
+      // Return to resting state after 4 seconds
+      setTimeout(() => {
+        if (!isPressed) {
+          micCore.className = "w-28 h-28 rounded-full border-4 border-white/20 bg-dark-surface flex items-center justify-center transition-all duration-300 shadow-2xl";
+          micIcon.className = "material-symbols-outlined text-5xl text-white/50";
+          micIcon.textContent = "volume_down";
+          title.textContent = "اضغط باستمرار على زر خفض الصوت";
+          desc.textContent = "الشاشة مقفلة لتوفير البطارية. المساعد الصوتي جاهز لسماع أوامرك في أي لحظة.";
+        }
+      }, 4000);
+    }
+
+    function playLockBeep(freq, duration) {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (err) {}
+    }
+
+    // Keep live clock updated
+    function updateClock() {
+      const now = new Date();
+      let hours = now.getHours();
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const ampm = hours >= 12 ? 'م' : 'ص';
+      hours = hours % 12 || 12;
+      document.getElementById('current-lock-time').textContent = `${hours}:${minutes} ${ampm}`;
+    }
+    updateClock();
+    setInterval(updateClock, 30000);
+  </script>
+
+
+</body></html>

@@ -1,0 +1,363 @@
+<!DOCTYPE html><html lang="ar" dir="rtl"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>بصير - الاتصال الهاتفي الصوتي وجهات الاتصال</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">/** @type {import('tailwindcss').Config} */
+globalThis.tailwind = globalThis.tailwind || {};
+globalThis.tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'accent': '#FFD026',
+        'success': '#10B981',
+        'error': '#EF4444',
+        'warning': '#F59E0B',
+        'listening': '#38BDF8',
+        'light-primary': '#0F172A',
+        'light-on-primary': '#FFFFFF',
+        'light-surface': '#FFFFFF',
+        'light-on-surface': '#090D16',
+        'dark-primary': '#FFD026',
+        'dark-on-primary': '#0A0A0A',
+        'dark-surface': '#0D1117',
+        'dark-on-surface': '#F3F4F6',
+      },
+      borderRadius: {
+        'sm': '8px',
+        'DEFAULT': '16px',
+        'md': '20px',
+        'lg': '24px',
+        'xl': '32px',
+        'full': '9999px',
+      },
+      spacing: {
+        'gutter-xs': '4px',
+        'gutter-sm': '8px',
+        'gutter-md': '16px',
+        'gutter-lg': '24px',
+        'gutter-xl': '32px',
+        'section': '32px',
+        'page-margin': '20px',
+      },
+      fontFamily: {
+        'display': ['"Cairo"', 'sans-serif'],
+        'headline': ['"Cairo"', 'sans-serif'],
+        'body': ['"Tajawal"', 'sans-serif'],
+        'label': ['"Cairo"', 'sans-serif'],
+      },
+      fontSize: {
+        'display-lg': ['36px', { lineHeight: '46px', letterSpacing: '-0.5px', fontWeight: '800' }],
+        'display-lg-mobile': ['30px', { lineHeight: '40px', letterSpacing: '-0.5px', fontWeight: '800' }],
+        'headline-lg': ['28px', { lineHeight: '38px', letterSpacing: '0px', fontWeight: '700' }],
+        'headline-lg-mobile': ['24px', { lineHeight: '34px', letterSpacing: '0px', fontWeight: '700' }],
+        'headline-md': ['20px', { lineHeight: '30px', letterSpacing: '0px', fontWeight: '700' }],
+        'body-lg': ['18px', { lineHeight: '28px', letterSpacing: '0px', fontWeight: '600' }],
+        'body-md': ['16px', { lineHeight: '26px', letterSpacing: '0px', fontWeight: '500' }],
+        'label-lg': ['18px', { lineHeight: '26px', letterSpacing: '0.2px', fontWeight: '700' }],
+        'label-md': ['14px', { lineHeight: '22px', letterSpacing: '0.2px', fontWeight: '700' }],
+      },
+      transitionDuration: {
+        'state-change': '120ms',
+        'surface-enter': '200ms',
+        'surface-exit': '150ms',
+      },
+      transitionDelay: {
+        'state-change': '0ms',
+        'surface-enter': '0ms',
+        'surface-exit': '0ms',
+      },
+      transitionTimingFunction: {
+        'state-change': 'ease-out',
+        'surface-enter': 'cubic-bezier(0, 0, 0.2, 1)',
+        'surface-exit': 'cubic-bezier(0.4, 0, 1, 1)',
+      },
+    },
+  },
+};
+if (typeof module !== 'undefined') module.exports = globalThis.tailwind.config;
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&amp;family=Tajawal:wght@400;500;700;800&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+  <style>
+    @keyframes ringingPulse {
+      0%, 100% { transform: scale(1); opacity: 0.9; }
+      50% { transform: scale(1.06); opacity: 1; }
+    }
+    .ringing-active {
+      animation: ringingPulse 1s ease-in-out infinite;
+    }
+    button:focus-visible, [role="button"]:focus-visible {
+      outline: 3px solid #38BDF8;
+      outline-offset: 3px;
+    }
+  </style>
+</head>
+<body class="bg-dark-surface text-dark-on-surface font-body min-h-[884px] flex flex-col justify-between selection:bg-dark-primary selection:text-dark-on-primary" data-stitch-vh="min-h-[884px]===min-h-screen">
+
+  <!-- Header with Back Navigation and Mode Indicator -->
+  <header class="sticky top-0 z-30 bg-dark-surface/95 border-b-2 border-dark-primary/20 px-page-margin py-3.5 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <a href="../voice-assistant-home/VoiceAssistantHome.html" class="w-12 h-12 rounded-xl bg-dark-surface border-2 border-dark-on-surface/40 hover:border-dark-primary text-dark-on-surface flex items-center justify-center active:scale-95 transition-all" aria-label="العودة للشاشة الرئيسية">
+        <span class="material-symbols-outlined text-2xl font-bold">arrow_forward</span>
+      </a>
+      <div>
+        <h1 class="font-headline text-headline-md font-bold text-dark-primary leading-tight">الهاتف والاتصال الصوتي</h1>
+        <p class="text-label-md text-dark-on-surface/70 leading-none">مكالمات بالأوامر الصوتية</p>
+      </div>
+    </div>
+
+    <!-- Quick Dialing Status Badge -->
+    <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-success/20 border border-success text-success font-headline font-bold text-label-md">
+      <span class="material-symbols-outlined text-base">phone_in_talk</span>
+      <span>الخط جاهز</span>
+    </div>
+  </header>
+
+  <!-- Main Content Flow -->
+  <main class="flex-1 px-page-margin py-4 flex flex-col gap-4 overflow-y-auto">
+
+    <!-- Active Call Simulator / Spoken Status Banner -->
+    <section aria-labelledby="dialer-status-title" class="rounded-xl border-3 border-dark-primary bg-dark-surface p-4 flex flex-col gap-3 shadow-lg">
+      <div class="flex items-center justify-between border-b border-dark-on-surface/20 pb-2.5">
+        <div class="flex items-center gap-2 text-dark-primary">
+          <span class="material-symbols-outlined text-2xl font-bold">record_voice_over</span>
+          <h2 id="dialer-status-title" class="font-headline text-headline-md font-bold text-dark-primary">
+            المساعد الصوتي للاتصال
+          </h2>
+        </div>
+        <span class="text-label-md px-2.5 py-0.5 rounded-full bg-dark-primary/15 text-dark-primary font-bold border border-dark-primary/40">
+          انطق الاسم أو الرقم
+        </span>
+      </div>
+
+      <p id="dialer-status-speech" class="font-body text-body-lg text-dark-on-surface font-bold leading-relaxed">
+        &#34;يمكنك القول: <span class="text-dark-primary underline font-bold">&#39;اتصل بأمي&#39;</span>، أو بالدارجة: <span class="text-dark-primary underline font-bold">&#39;عيط لـ أحمد&#39;</span>، أو قل الرقم مباشرة.&#34;
+      </p>
+
+      <!-- Active Ongoing Call Card (Simulated Output) -->
+      <div id="calling-active-card" class="rounded-xl border-2 border-success bg-success/10 p-4 flex items-center justify-between hidden">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-full bg-success text-black flex items-center justify-center ringing-active">
+            <span class="material-symbols-outlined text-2xl font-bold">call</span>
+          </div>
+          <div>
+            <div id="calling-contact-name" class="font-headline text-headline-md font-bold text-success">
+              جاري الاتصال بـ أمي...
+            </div>
+            <div id="calling-contact-phone" class="text-body-md text-dark-on-surface/80 tabular-nums">
+              06 61 23 45 67
+            </div>
+          </div>
+        </div>
+
+        <button type="button" onclick="endSimulatedCall()" class="min-h-[48px] px-4 rounded-lg bg-error text-white font-headline font-bold text-label-md border border-error active:scale-95 transition-all" aria-label="إنهاء المكالمة">
+          قطع المكالمة
+        </button>
+      </div>
+    </section>
+
+    <!-- Specific Dedicated Section: Tactile Frequent Contacts (الأسماء المفضلة للمكفوفين) -->
+    <section aria-labelledby="frequent-contacts-heading" class="rounded-xl border-2 border-listening/40 bg-dark-surface p-4 flex flex-col gap-3">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2 text-dark-primary">
+          <span class="material-symbols-outlined text-2xl font-bold">star</span>
+          <h2 id="frequent-contacts-heading" class="font-headline text-headline-md font-bold text-dark-primary">
+            الأرقام المفضلة والسريعة
+          </h2>
+        </div>
+        <span class="text-label-md text-dark-on-surface/70 font-semibold">ضغطة واحدة للاتصال</span>
+      </div>
+
+      <div class="grid grid-cols-1 gap-2.5">
+        <!-- Contact 1: Mother -->
+        <button type="button" onclick="startCall(&#39;أمي (الوالدة)&#39;, &#39;06 61 23 45 67&#39;)" class="w-full text-right p-3.5 rounded-lg border-2 border-dark-on-surface/30 hover:border-dark-primary bg-dark-surface active:bg-dark-primary/10 flex items-center justify-between gap-3 group transition-all">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-full bg-dark-primary text-dark-on-primary font-headline font-bold text-xl flex items-center justify-center border-2 border-listening">
+              م
+            </div>
+            <div>
+              <div class="font-headline text-label-lg font-bold text-dark-on-surface group-hover:text-dark-primary">أمي (الوالدة)</div>
+              <div class="text-body-md text-dark-on-surface/70 tabular-nums">06 61 23 45 67 • قل &#34;عيط لـ أمي&#34;</div>
+            </div>
+          </div>
+          <div class="w-10 h-10 rounded-full bg-success/20 text-success border border-success flex items-center justify-center group-hover:scale-110 transition-transform">
+            <span class="material-symbols-outlined text-2xl">call</span>
+          </div>
+        </button>
+
+        <!-- Contact 2: Brother Amin -->
+        <button type="button" onclick="startCall(&#39;أمين (الأخ)&#39;, &#39;06 62 88 99 00&#39;)" class="w-full text-right p-3.5 rounded-lg border-2 border-dark-on-surface/30 hover:border-dark-primary bg-dark-surface active:bg-dark-primary/10 flex items-center justify-between gap-3 group transition-all">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-full bg-listening/20 text-listening font-headline font-bold text-xl flex items-center justify-center border-2 border-listening">
+              أ
+            </div>
+            <div>
+              <div class="font-headline text-label-lg font-bold text-dark-on-surface group-hover:text-dark-primary">أمين (الأخ)</div>
+              <div class="text-body-md text-dark-on-surface/70 tabular-nums">06 62 88 99 00 • قل &#34;عيط لـ أمين&#34;</div>
+            </div>
+          </div>
+          <div class="w-10 h-10 rounded-full bg-success/20 text-success border border-success flex items-center justify-center group-hover:scale-110 transition-transform">
+            <span class="material-symbols-outlined text-2xl">call</span>
+          </div>
+        </button>
+
+        <!-- Contact 3: Doctor Said -->
+        <button type="button" onclick="startCall(&#39;دكتور سعيد (العيادة)&#39;, &#39;05 22 40 50 60&#39;)" class="w-full text-right p-3.5 rounded-lg border-2 border-dark-on-surface/30 hover:border-dark-primary bg-dark-surface active:bg-dark-primary/10 flex items-center justify-between gap-3 group transition-all">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-full bg-warning/20 text-warning font-headline font-bold text-xl flex items-center justify-center border-2 border-warning">
+              ط
+            </div>
+            <div>
+              <div class="font-headline text-label-lg font-bold text-dark-on-surface group-hover:text-dark-primary">دكتور سعيد (العيادة)</div>
+              <div class="text-body-md text-dark-on-surface/70 tabular-nums">05 22 40 50 60 • هاتف ثابت</div>
+            </div>
+          </div>
+          <div class="w-10 h-10 rounded-full bg-success/20 text-success border border-success flex items-center justify-center group-hover:scale-110 transition-transform">
+            <span class="material-symbols-outlined text-2xl">call</span>
+          </div>
+        </button>
+
+        <!-- Contact 4: Emergency SOS -->
+        <button type="button" onclick="startCall(&#39;الطوارئ (190 / 150)&#39;, &#39;190&#39;)" class="w-full text-right p-3.5 rounded-lg border-2 border-error/50 hover:border-error bg-error/10 active:bg-error/20 flex items-center justify-between gap-3 group transition-all">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-full bg-error text-white font-headline font-bold text-xl flex items-center justify-center border-2 border-error">
+              <span class="material-symbols-outlined text-2xl">sos</span>
+            </div>
+            <div>
+              <div class="font-headline text-label-lg font-bold text-error">مكالمة الطوارئ والإسعاف</div>
+              <div class="text-body-md text-dark-on-surface/80">رقم مجاني فوري • قل &#34;اتصل بالطوارئ&#34;</div>
+            </div>
+          </div>
+          <div class="w-10 h-10 rounded-full bg-error text-white flex items-center justify-center group-hover:scale-110 transition-transform">
+            <span class="material-symbols-outlined text-2xl">emergency</span>
+          </div>
+        </button>
+      </div>
+    </section>
+
+    <!-- Recent Spoken Calls History -->
+    <section aria-labelledby="recent-calls-heading" class="rounded-xl border-2 border-dark-on-surface/30 bg-dark-surface p-4 flex flex-col gap-3">
+      <div class="flex items-center justify-between">
+        <h2 id="recent-calls-heading" class="font-headline text-headline-md font-bold text-dark-primary">
+          آخر المكالمات (سجل ناطق)
+        </h2>
+        <button type="button" onclick="readCallsHistory()" class="flex items-center gap-1 bg-dark-surface border border-dark-on-surface/40 px-2.5 py-1 rounded-lg text-label-md font-bold text-listening" aria-label="قراءة سجل المكالمات بالصوت">
+          <span class="material-symbols-outlined text-base">volume_up</span>
+          <span>اقرأ السجل</span>
+        </button>
+      </div>
+
+      <div class="space-y-2 text-body-md text-dark-on-surface">
+        <div class="p-3 rounded-lg border border-dark-on-surface/20 flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <span class="material-symbols-outlined text-success">call_received</span>
+            <div>
+              <div class="font-bold">مكالمة واردة من أمي</div>
+              <div class="text-xs text-dark-on-surface/60">اليوم 09:30 ص • مدة 3 دقائق</div>
+            </div>
+          </div>
+          <button type="button" onclick="startCall(&#39;أمي&#39;, &#39;06 61 23 45 67&#39;)" class="text-dark-primary font-bold text-label-md px-3 py-1 rounded border border-dark-primary">
+            معاودة الاتصال
+          </button>
+        </div>
+
+        <div class="p-3 rounded-lg border border-dark-on-surface/20 flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <span class="material-symbols-outlined text-error">call_missed</span>
+            <div>
+              <div class="font-bold text-error">مكالمة لم يرد عليها: أمين</div>
+              <div class="text-xs text-dark-on-surface/60">أمس 07:15 م</div>
+            </div>
+          </div>
+          <button type="button" onclick="startCall(&#39;أمين&#39;, &#39;06 62 88 99 00&#39;)" class="text-dark-primary font-bold text-label-md px-3 py-1 rounded border border-dark-primary">
+            معاودة الاتصال
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Big Tactile Dial Microphone Footer Dock -->
+  <footer class="sticky bottom-0 z-40 bg-dark-surface/98 border-t-2 border-dark-primary/30 px-page-margin py-3 flex flex-col items-center gap-2 shadow-2xl">
+    <div class="w-full flex items-center justify-between text-label-md font-bold text-dark-on-surface/75 px-1">
+      <span class="flex items-center gap-1.5 text-listening">
+        <span class="material-symbols-outlined text-base">volume_down</span>
+        <span>مدعوم بزر خفض الصوت أيضاً</span>
+      </span>
+      <span class="text-dark-primary">انطق اسم أي جهة اتصال</span>
+    </div>
+
+    <!-- Huge Central Voice Call Microphone Button (>= 64px) -->
+    <button id="dial-voice-btn" type="button" onclick="startVoiceDialingPrompt()" class="w-full min-h-[60px] rounded-xl bg-dark-primary text-dark-on-primary font-headline font-black text-headline-md flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all focus:ring-4 focus:ring-listening" aria-label="تحدث لطلب رقم أو اسم هاتفياً">
+      <span class="material-symbols-outlined text-3xl font-bold">ring_volume</span>
+      <span>انقر هنا وانطق الاسم للاتصال فوراً</span>
+    </button>
+  </footer>
+
+  <script>
+    function startCall(name, phone) {
+      const card = document.getElementById('calling-active-card');
+      const contactName = document.getElementById('calling-contact-name');
+      const contactPhone = document.getElementById('calling-contact-phone');
+      const speech = document.getElementById('dialer-status-speech');
+
+      card.classList.remove('hidden');
+      contactName.textContent = `جاري الاتصال بـ ${name}...`;
+      contactPhone.textContent = phone;
+      speech.innerHTML = `<span class="text-success font-bold">جاري طلب المكالمة:</span> اتصل بـ ${name} (${phone})`;
+
+      playPhoneRing();
+      speakDialerText(`جاري الاتصال بـ ${name}... يرجى الانتظار`);
+    }
+
+    function endSimulatedCall() {
+      const card = document.getElementById('calling-active-card');
+      const speech = document.getElementById('dialer-status-speech');
+      card.classList.add('hidden');
+      speech.textContent = "تم إنهاء المكالمة. الهاتف جاهز لأمرك القادم.";
+      speakDialerText("تم إنهاء المكالمة.");
+    }
+
+    function readCallsHistory() {
+      speakDialerText("سجل المكالمات: مكالمة واردة من أمي اليوم في التاسعة والنصف صباحاً. ومكالمة لم يرد عليها من أمين بالأمس.");
+    }
+
+    function startVoiceDialingPrompt() {
+      speakDialerText("تفضل، من هو الشخص الذي ترغب في الاتصال به؟");
+      setTimeout(() => {
+        startCall("أمي (الوالدة)", "06 61 23 45 67");
+      }, 3000);
+    }
+
+    function speakDialerText(text) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'ar-SA';
+        utterance.rate = 0.95;
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    function playPhoneRing() {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+        osc.frequency.setValueAtTime(480, audioCtx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.4);
+      } catch (e) {}
+    }
+  </script>
+
+
+</body></html>

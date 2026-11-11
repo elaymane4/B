@@ -1,0 +1,359 @@
+<!DOCTYPE html><html lang="ar" dir="rtl"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>بصير - المساعد البصري للتعرف على المحيط</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">/** @type {import('tailwindcss').Config} */
+globalThis.tailwind = globalThis.tailwind || {};
+globalThis.tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'accent': '#FFD026',
+        'success': '#10B981',
+        'error': '#EF4444',
+        'warning': '#F59E0B',
+        'listening': '#38BDF8',
+        'light-primary': '#0F172A',
+        'light-on-primary': '#FFFFFF',
+        'light-surface': '#FFFFFF',
+        'light-on-surface': '#090D16',
+        'dark-primary': '#FFD026',
+        'dark-on-primary': '#0A0A0A',
+        'dark-surface': '#0D1117',
+        'dark-on-surface': '#F3F4F6',
+      },
+      borderRadius: {
+        'sm': '8px',
+        'DEFAULT': '16px',
+        'md': '20px',
+        'lg': '24px',
+        'xl': '32px',
+        'full': '9999px',
+      },
+      spacing: {
+        'gutter-xs': '4px',
+        'gutter-sm': '8px',
+        'gutter-md': '16px',
+        'gutter-lg': '24px',
+        'gutter-xl': '32px',
+        'section': '32px',
+        'page-margin': '20px',
+      },
+      fontFamily: {
+        'display': ['"Cairo"', 'sans-serif'],
+        'headline': ['"Cairo"', 'sans-serif'],
+        'body': ['"Tajawal"', 'sans-serif'],
+        'label': ['"Cairo"', 'sans-serif'],
+      },
+      fontSize: {
+        'display-lg': ['36px', { lineHeight: '46px', letterSpacing: '-0.5px', fontWeight: '800' }],
+        'display-lg-mobile': ['30px', { lineHeight: '40px', letterSpacing: '-0.5px', fontWeight: '800' }],
+        'headline-lg': ['28px', { lineHeight: '38px', letterSpacing: '0px', fontWeight: '700' }],
+        'headline-lg-mobile': ['24px', { lineHeight: '34px', letterSpacing: '0px', fontWeight: '700' }],
+        'headline-md': ['20px', { lineHeight: '30px', letterSpacing: '0px', fontWeight: '700' }],
+        'body-lg': ['18px', { lineHeight: '28px', letterSpacing: '0px', fontWeight: '600' }],
+        'body-md': ['16px', { lineHeight: '26px', letterSpacing: '0px', fontWeight: '500' }],
+        'label-lg': ['18px', { lineHeight: '26px', letterSpacing: '0.2px', fontWeight: '700' }],
+        'label-md': ['14px', { lineHeight: '22px', letterSpacing: '0.2px', fontWeight: '700' }],
+      },
+      transitionDuration: {
+        'state-change': '120ms',
+        'surface-enter': '200ms',
+        'surface-exit': '150ms',
+      },
+      transitionDelay: {
+        'state-change': '0ms',
+        'surface-enter': '0ms',
+        'surface-exit': '0ms',
+      },
+      transitionTimingFunction: {
+        'state-change': 'ease-out',
+        'surface-enter': 'cubic-bezier(0, 0, 0.2, 1)',
+        'surface-exit': 'cubic-bezier(0.4, 0, 1, 1)',
+      },
+    },
+  },
+};
+if (typeof module !== 'undefined') module.exports = globalThis.tailwind.config;
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&amp;family=Tajawal:wght@400;500;700;800&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+  <style>
+    @keyframes radarScan {
+      0% { top: 0%; opacity: 0.8; }
+      50% { opacity: 1; }
+      100% { top: 100%; opacity: 0.2; }
+    }
+    .scanner-line {
+      animation: radarScan 2.2s linear infinite;
+    }
+    button:focus-visible, [role="button"]:focus-visible {
+      outline: 3px solid #38BDF8;
+      outline-offset: 3px;
+    }
+  </style>
+</head>
+<body class="bg-dark-surface text-dark-on-surface font-body min-h-[884px] flex flex-col justify-between selection:bg-dark-primary selection:text-dark-on-primary" data-stitch-vh="min-h-[884px]===min-h-screen">
+
+  <!-- Header with Back Navigation and Mode Indicator -->
+  <header class="sticky top-0 z-30 bg-dark-surface/95 border-b-2 border-dark-primary/20 px-page-margin py-3.5 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <a href="../voice-assistant-home/VoiceAssistantHome.html" class="w-12 h-12 rounded-xl bg-dark-surface border-2 border-dark-on-surface/40 hover:border-dark-primary text-dark-on-surface flex items-center justify-center active:scale-95 transition-all" aria-label="العودة للشاشة الرئيسية">
+        <span class="material-symbols-outlined text-2xl font-bold">arrow_forward</span>
+      </a>
+      <div>
+        <h1 class="font-headline text-headline-md font-bold text-dark-primary leading-tight">المساعد البصري</h1>
+        <p class="text-label-md text-dark-on-surface/70 leading-none">الكاميرا الذكية الناطقة</p>
+      </div>
+    </div>
+
+    <!-- Active Camera Status Badge -->
+    <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-warning/20 border border-warning text-warning font-headline font-bold text-label-md">
+      <span class="w-2.5 h-2.5 rounded-full bg-warning animate-ping"></span>
+      <span>الكاميرا تعمل</span>
+    </div>
+  </header>
+
+  <!-- Main Viewfinder & Surrounding Description Flow -->
+  <main class="flex-1 px-page-margin py-4 flex flex-col gap-4 overflow-y-auto">
+
+    <!-- Camera Viewfinder Simulation with Accessibility Target Bounds -->
+    <section aria-label="شاشة الكاميرا الذكية" class="relative rounded-2xl border-3 border-dark-primary overflow-hidden bg-black min-h-[260px] flex items-center justify-center shadow-xl">
+      <!-- High-contrast camera simulated view background -->
+      <div class="absolute inset-0 bg-gradient-to-b from-dark-surface/80 via-black/40 to-black/90 flex items-center justify-center">
+        <!-- Center Targeting Grid for Low-vision / blind orienting -->
+        <div class="w-48 h-48 border-2 border-dashed border-listening/70 rounded-xl relative flex items-center justify-center">
+          <span class="material-symbols-outlined text-5xl text-dark-primary/60">center_focus_strong</span>
+          <!-- Radar Scanning Line -->
+          <div class="absolute left-0 right-0 h-1 bg-listening/80 shadow-[0_0_15px_#38BDF8] scanner-line"></div>
+        </div>
+      </div>
+
+      <!-- Live Recognized Object Tag Overlay -->
+      <div class="absolute top-4 right-4 bg-dark-surface/90 border-2 border-success text-success px-3.5 py-1.5 rounded-full font-headline font-bold text-label-md flex items-center gap-1.5 shadow-lg">
+        <span class="material-symbols-outlined text-lg">check_circle</span>
+        <span id="detected-object-badge">باب الغرفة (مفتوح)</span>
+      </div>
+
+      <!-- Distance and Direction HUD -->
+      <div class="absolute bottom-4 left-4 bg-dark-surface/90 border-2 border-dark-primary text-dark-primary px-3.5 py-1.5 rounded-lg font-headline font-bold text-label-md flex items-center gap-2 shadow-lg">
+        <span class="material-symbols-outlined text-xl">straighten</span>
+        <span id="detected-distance">المسافة: 2.1 متر أمامك</span>
+      </div>
+    </section>
+
+    <!-- Spoken Description Box (Real-time Audio Readout) -->
+    <section aria-labelledby="surrounding-desc-title" class="rounded-xl border-3 border-dark-primary bg-dark-surface p-4 flex flex-col gap-3 shadow-lg">
+      <div class="flex items-center justify-between border-b border-dark-on-surface/20 pb-2.5">
+        <div class="flex items-center gap-2 text-dark-primary">
+          <span class="material-symbols-outlined text-2xl font-bold">record_voice_over</span>
+          <h2 id="surrounding-desc-title" class="font-headline text-headline-md font-bold text-dark-primary">
+            وصف المحيط صوتياً
+          </h2>
+        </div>
+        <button type="button" onclick="repeatCurrentDescription()" class="flex items-center gap-1 bg-dark-primary/20 text-dark-primary hover:bg-dark-primary hover:text-dark-on-primary border border-dark-primary/60 px-3 py-1.5 rounded-lg text-label-md font-bold transition-all" aria-label="إعادة نطق الوصف الصوتي للمحيط">
+          <span class="material-symbols-outlined text-lg">volume_up</span>
+          <span>إعادة النطق</span>
+        </button>
+      </div>
+
+      <!-- Description Body -->
+      <p id="spoken-surrounding-text" class="font-body text-body-lg text-dark-on-surface font-bold leading-relaxed">
+        &#34;يوجد أمامك ممر مستقيم خالٍ من العوائق. على بُعد مترين يوجد باب مفتوح يؤدي إلى الصالون، وعلى يمينك طاولة خشبية صغيرة.&#34;
+      </p>
+
+      <!-- Dialect Toggle Button for Description -->
+      <div class="flex items-center justify-between pt-2 border-t border-dark-on-surface/20">
+        <span class="text-label-md text-dark-on-surface/70 font-semibold">لغة الوصف:</span>
+        <div class="flex gap-2">
+          <button type="button" onclick="switchCamLang(&#39;fusha&#39;)" id="cam-btn-fusha" class="px-3 py-1 rounded-full text-label-md font-bold bg-dark-primary text-dark-on-primary border border-dark-primary">
+            الفصحى
+          </button>
+          <button type="button" onclick="switchCamLang(&#39;darija&#39;)" id="cam-btn-darija" class="px-3 py-1 rounded-full text-label-md font-bold bg-dark-surface text-dark-on-surface/80 border border-dark-on-surface/30">
+            الدارجة المغربية
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Specific Detection Modes -->
+    <section aria-label="أوضاع الكاميرا الخاصة" class="grid grid-cols-2 gap-3">
+      <!-- Mode 1: Text / Paper Document Reader (OCR) -->
+      <button type="button" onclick="triggerCamMode(&#39;ocr&#39;)" class="p-3.5 rounded-xl border-2 border-dark-on-surface/30 hover:border-dark-primary bg-dark-surface active:scale-95 flex flex-col items-center justify-center gap-2 text-center transition-all">
+        <div class="w-12 h-12 rounded-lg bg-listening/20 text-listening border border-listening flex items-center justify-center">
+          <span class="material-symbols-outlined text-2xl">document_scanner</span>
+        </div>
+        <span class="font-headline text-label-lg font-bold text-dark-on-surface">قراءة ورقة أو كتاب</span>
+        <span class="text-label-md text-dark-on-surface/70">تحويل النص إلى صوت</span>
+      </button>
+
+      <!-- Mode 2: Currency / Money Recognizer -->
+      <button type="button" onclick="triggerCamMode(&#39;money&#39;)" class="p-3.5 rounded-xl border-2 border-dark-on-surface/30 hover:border-dark-primary bg-dark-surface active:scale-95 flex flex-col items-center justify-center gap-2 text-center transition-all">
+        <div class="w-12 h-12 rounded-lg bg-success/20 text-success border border-success flex items-center justify-center">
+          <span class="material-symbols-outlined text-2xl">payments</span>
+        </div>
+        <span class="font-headline text-label-lg font-bold text-dark-on-surface">التعرف على النقود</span>
+        <span class="text-label-md text-dark-on-surface/70">درهم مغربي / عملات</span>
+      </button>
+
+      <!-- Mode 3: Color Identifier -->
+      <button type="button" onclick="triggerCamMode(&#39;color&#39;)" class="p-3.5 rounded-xl border-2 border-dark-on-surface/30 hover:border-dark-primary bg-dark-surface active:scale-95 flex flex-col items-center justify-center gap-2 text-center transition-all">
+        <div class="w-12 h-12 rounded-lg bg-accent/20 text-dark-primary border border-dark-primary flex items-center justify-center">
+          <span class="material-symbols-outlined text-2xl">palette</span>
+        </div>
+        <span class="font-headline text-label-lg font-bold text-dark-on-surface">التعرف على الألوان</span>
+        <span class="text-label-md text-dark-on-surface/70">نطق لون الملابس</span>
+      </button>
+
+      <!-- Mode 4: Barcode / Product Info -->
+      <button type="button" onclick="triggerCamMode(&#39;barcode&#39;)" class="p-3.5 rounded-xl border-2 border-dark-on-surface/30 hover:border-dark-primary bg-dark-surface active:scale-95 flex flex-col items-center justify-center gap-2 text-center transition-all">
+        <div class="w-12 h-12 rounded-lg bg-warning/20 text-warning border border-warning flex items-center justify-center">
+          <span class="material-symbols-outlined text-2xl">qr_code_scanner</span>
+        </div>
+        <span class="font-headline text-label-lg font-bold text-dark-on-surface">المنتجات والعلب</span>
+        <span class="text-label-md text-dark-on-surface/70">قراءة الصلاحية والاسم</span>
+      </button>
+    </section>
+
+  </main>
+
+  <!-- Big Tactile Shutter & Hardware Volume Down Reminder Dock -->
+  <footer class="sticky bottom-0 z-40 bg-dark-surface/98 border-t-2 border-dark-primary/30 px-page-margin py-3 flex flex-col items-center gap-2 shadow-2xl">
+    <div class="w-full flex items-center justify-between text-label-md font-bold text-dark-on-surface/75 px-1">
+      <span class="flex items-center gap-1.5 text-listening">
+        <span class="material-symbols-outlined text-base">volume_down</span>
+        <span>أو اضغط زر خفض الصوت الفيزيائي</span>
+      </span>
+      <span class="text-dark-primary">انقر للمسح الفوري</span>
+    </div>
+
+    <!-- Big Capture Button (>= 64px) -->
+    <button id="cam-scan-btn" type="button" onclick="scanSceneNow()" class="w-full min-h-[60px] rounded-xl bg-dark-primary text-dark-on-primary font-headline font-black text-headline-md flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all focus:ring-4 focus:ring-listening" aria-label="التقاط صورة ووصف ما أمامك صوتياً">
+      <span class="material-symbols-outlined text-3xl font-bold">photo_camera</span>
+      <span>امسح الآن وصِف ما أمامي</span>
+    </button>
+  </footer>
+
+  <script>
+    let camLang = 'fusha';
+
+    const camScenarios = [
+      {
+        badge: "باب الغرفة (مفتوح)",
+        dist: "المسافة: 2.1 متر أمامك",
+        fusha: "يوجد أمامك ممر مستقيم خالٍ من العوائق. على بُعد مترين يوجد باب مفتوح يؤدي إلى الصالون، وعلى يمينك طاولة خشبية صغيرة.",
+        darija: "كاين قدامك طريق مسرحة ما فيها حتى عائق. على بعد جوج ميترو كاين باب محلول كيدي للصالون، وعلى اليمن ديالك كاين طبلة صغيرة ديال العود."
+      },
+      {
+        badge: "ورقة نقدية: 100 درهم",
+        dist: "المسافة: 30 سم",
+        fusha: "تم التعرف على ورقة نقدية مغربية من فئة 100 درهم بحالة جيدة.",
+        darija: "هادي ورقة ديال 100 درهم مغربية مقادة ومزيانة."
+      },
+      {
+        badge: "نص مكتوب (ورقة)",
+        dist: "المسافة: 25 سم",
+        fusha: "قراءة النص: 'موعد الفحص الطبي يوم الخميس القادم على الساعة الرابعة مساءً في عيادة الدكتور سعيد'.",
+        darija: "الميساج المكتوب فالورقة كيقول: موعد الطبيب نهار الخميس الجاي مع الـ 4 دالعشية عند الدكتور سعيد."
+      },
+      {
+        badge: "كرسي أمامك مباشرة",
+        dist: "المسافة: 80 سم (انتبه)",
+        fusha: "انتبه: يوجد كرسي مكتب أسود أمامك مباشرة على مسافة أقل من متر، انحرف قليلاً إلى اليسار.",
+        darija: "رد البال: كاين كرسي كحل قدامك نيشان على بعد قل من ميترو، دور شوية لليسار."
+      }
+    ];
+
+    let camIndex = 0;
+
+    function scanSceneNow() {
+      playCamChime();
+      camIndex = (camIndex + 1) % camScenarios.length;
+      const scenario = camScenarios[camIndex];
+
+      document.getElementById('detected-object-badge').textContent = scenario.badge;
+      document.getElementById('detected-distance').textContent = scenario.dist;
+      
+      const text = camLang === 'fusha' ? scenario.fusha : scenario.darija;
+      document.getElementById('spoken-surrounding-text').textContent = `"${text}"`;
+
+      speakCamText(text);
+    }
+
+    function repeatCurrentDescription() {
+      const text = document.getElementById('spoken-surrounding-text').textContent;
+      speakCamText(text);
+    }
+
+    function switchCamLang(lang) {
+      camLang = lang;
+      const btnFusha = document.getElementById('cam-btn-fusha');
+      const btnDarija = document.getElementById('cam-btn-darija');
+
+      if (lang === 'fusha') {
+        btnFusha.className = "px-3 py-1 rounded-full text-label-md font-bold bg-dark-primary text-dark-on-primary border border-dark-primary";
+        btnDarija.className = "px-3 py-1 rounded-full text-label-md font-bold bg-dark-surface text-dark-on-surface/80 border border-dark-on-surface/30";
+      } else {
+        btnDarija.className = "px-3 py-1 rounded-full text-label-md font-bold bg-dark-primary text-dark-on-primary border border-dark-primary";
+        btnFusha.className = "px-3 py-1 rounded-full text-label-md font-bold bg-dark-surface text-dark-on-surface/80 border border-dark-on-surface/30";
+      }
+
+      const scenario = camScenarios[camIndex];
+      const text = camLang === 'fusha' ? scenario.fusha : scenario.darija;
+      document.getElementById('spoken-surrounding-text').textContent = `"${text}"`;
+      speakCamText(text);
+    }
+
+    function triggerCamMode(mode) {
+      playCamChime();
+      let modeText = "";
+      if (mode === 'ocr') {
+        camIndex = 2;
+        modeText = "تم تفعيل قارئ النصوص والأوراق. وجّه الكاميرا نحو الورقة.";
+      } else if (mode === 'money') {
+        camIndex = 1;
+        modeText = "تم تفعيل قارئ النقود. ضع الورقة النقدية أمام الكاميرا.";
+      } else if (mode === 'color') {
+        modeText = "تم تفعيل قارئ الألوان: اللون أمامك هو الأزرق الداكن.";
+      } else if (mode === 'barcode') {
+        modeText = "تم تفعيل قارئ الباركود: منتج حليب معقم، الصلاحية حتى نهاية الشهر.";
+      }
+
+      const scenario = camScenarios[camIndex];
+      document.getElementById('detected-object-badge').textContent = scenario.badge;
+      document.getElementById('detected-distance').textContent = scenario.dist;
+      document.getElementById('spoken-surrounding-text').textContent = `"${modeText}"`;
+      speakCamText(modeText);
+    }
+
+    function speakCamText(text) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text.replace(/["']/g, ''));
+        utterance.lang = 'ar-SA';
+        utterance.rate = 0.95;
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    function playCamChime() {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15);
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.15);
+      } catch (e) {}
+    }
+  </script>
+
+
+</body></html>
